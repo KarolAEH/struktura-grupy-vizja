@@ -4,7 +4,7 @@ Narzędzie do wspólnego projektowania struktury funkcjonalnej Grupy VIZJA (UV, 
 
 - **Hosting:** Vercel (statyczna strona + jedna funkcja `api/config.js`)
 - **Baza, logowanie, zmiany na żywo:** Supabase
-- **Logowanie:** link wysyłany na e-mail; dostęp mają tylko osoby z listy „Zespół”
+- **Logowanie:** jednorazowy link (administrator generuje go w oknie „Zespół” albo Supabase wysyła go e-mailem); dostęp mają tylko osoby z listy „Zespół”
 
 ## Wdrożenie krok po kroku
 
@@ -38,25 +38,27 @@ Całość zajmuje ok. 20–30 minut. Nie trzeba niczego instalować na komputerz
 - **Site URL:** adres z kroku 1, np. `https://struktura-grupy-vizja.vercel.app`
 - **Redirect URLs:** dodaj ten sam adres.
 
-### 5. Supabase: skrzynka do wysyłki linków (ważne)
+### 5. Pierwsze logowanie
 
-Bez własnego serwera poczty Supabase wysyła linki **tylko do członków zespołu projektu Supabase** i najwyżej 2 wiadomości na godzinę. Żeby osoby z trzech uczelni mogły się logować:
-
-1. Załóż darmowe konto w usłudze wysyłki, np. [Brevo](https://www.brevo.com) lub [Resend](https://resend.com), albo poproś dział IT o dane SMTP uczelni.
-2. W Supabase: **Authentication** → **Emails** → **SMTP Settings** → **Enable custom SMTP** i wpisz dane (host, port, użytkownik, hasło, adres nadawcy, np. `struktura@vizja.pl`).
-3. Opcjonalnie: **Authentication** → **Emails** → **Templates** → „Magic Link” – zmień treść wiadomości na polską.
-
-Do czasu konfiguracji SMTP możesz się logować adresem, którym zakładałeś konto Supabase.
-
-### 6. Pierwsze logowanie i zespół
-
-1. Otwórz stronę, wpisz swój e-mail i kliknij link z wiadomości.
+1. Otwórz stronę, wpisz adres e-mail, którym logujesz się do Supabase, i kliknij link z wiadomości (na ten adres Supabase wysyła wiadomości bez dodatkowej konfiguracji).
 2. **Pierwsza zalogowana osoba zostaje administratorem.** Zrób to od razu po wdrożeniu.
-3. Kliknij **Zespół** i dodaj osoby z UV, UAFM i UZW. Role:
+
+### 6. Dodawanie zespołu i linki logowania
+
+1. Kliknij **Zespół**, wpisz e-mail, imię i nazwisko, uczelnię i rolę, potem **Dodaj do zespołu**. Role:
    - **Podgląd i komentarze** – przegląda i komentuje,
    - **Edycja** – zmienia strukturę,
    - **Administrator** – dodatkowo zarządza zespołem i listą uczelni.
-4. Dodane osoby logują się same, wpisując swój adres na stronie.
+2. Od razu pojawi się **jednorazowy link logowania** i gotowa wiadomość. Skopiuj ją i wyślij tej osobie sam (e-mail, Teams). Link możesz też wygenerować później przyciskiem **Link logowania** przy danej osobie.
+3. Po kliknięciu linku osoba pozostaje zalogowana w tej przeglądarce. Nowy link jest potrzebny tylko po wylogowaniu, na innym urządzeniu albo gdy poprzedni wygasł.
+
+Linki generuje funkcja `api/login-link.js` z kluczem `SUPABASE_SERVICE_ROLE_KEY` (ustawia go integracja Supabase w Vercelu; klucz nie trafia do przeglądarki). Funkcja sprawdza, że prosi administrator i że adres jest na liście zespołu.
+
+Czas ważności linku ustawisz w Supabase: **Authentication → Configuration → Sign In / Providers → Email → Email OTP Expiration** (maks. 86400 s = 24 h).
+
+### 7. (Opcjonalnie) Wysyłka linków e-mailem z Supabase
+
+Jeśli zespół ma sam prosić o link na stronie logowania, Supabase potrzebuje własnego serwera poczty, bo domyślnie wysyła wiadomości tylko do członków zespołu projektu Supabase (limit 2 na godzinę). Ustawisz to w **Authentication → Emails → SMTP Settings** (np. Gmail z hasłem do aplikacji, Brevo, Resend albo SMTP uczelni).
 
 ## Kolejne zmiany
 
@@ -68,6 +70,7 @@ Każda zmiana w repozytorium (np. wprowadzona z pomocą Claude) wdraża się na 
 |---|---|
 | `index.html` | cała aplikacja (widoki: Struktura, Mapa funkcji, Macierz odpowiedzialności, Do uzgodnienia, Historia zmian) |
 | `api/config.js` | przekazuje stronie adres i publiczny klucz Supabase ze zmiennych Vercela |
+| `api/login-link.js` | tworzy jednorazowe linki logowania (tylko dla administratora) |
 | `supabase/setup.sql` | tabele, uprawnienia (RLS), zmiany na żywo, dane startowe |
 | `vercel.json` | nagłówki bezpieczeństwa |
 
