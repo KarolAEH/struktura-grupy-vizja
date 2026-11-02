@@ -287,9 +287,22 @@ async function boot(){
     if(sess&&!S.started){S.session=sess;start();}
     if(ev==='SIGNED_OUT'){history.replaceState(null,'',location.pathname);location.reload();}});
   const {data}=await sb.auth.getSession();
+  const qp=new URLSearchParams(location.search);const lt=qp.get('logowanie');
+  if(lt){
+    if(data&&data.session){history.replaceState(null,'',location.pathname);S.session=data.session;start();return;}
+    showTokenLogin(lt,qp.get('typ')||'magiclink');return;}
   if(data&&data.session){S.session=data.session;start();}
   else if(!S.started){const err=new URLSearchParams((location.hash||'').slice(1)).get('error_description');showLogin(err);}
 }
+function showTokenLogin(tokenHash,typ){
+  shell('<h2>Logowanie do narzędzia</h2><p class="muted">Struktura organizacyjna Grupy VIZJA. Kliknij przycisk, żeby się zalogować. Link działa jeden raz.</p><button class="btn primary" id="tbtn" style="width:100%;padding:9px">Zaloguj się</button><div id="lmsg" role="status"></div>');
+  $('#tbtn').onclick=async()=>{const b=$('#tbtn');b.disabled=true;$('#lmsg').className='';$('#lmsg').textContent='Logowanie…';
+    try{const type=['magiclink','invite','signup','email','recovery'].includes(typ)?typ:'magiclink';
+      const r=chk(await sb.auth.verifyOtp({token_hash:tokenHash,type}));
+      history.replaceState(null,'',location.pathname);
+      if(r&&r.session){S.session=r.session;start();}else{const {data}=await sb.auth.getSession();if(data&&data.session){S.session=data.session;start();}else throw new Error('Brak sesji');}
+    }catch(e){history.replaceState(null,'',location.pathname);
+      $('#lmsg').className='gerr';$('#lmsg').textContent='Ten link wygasł albo został już użyty. Poproś administratora narzędzia o nowy link logowania.';}};}
 function showLogin(err){
   if(/access_token|error/.test(location.hash))history.replaceState(null,'',location.pathname);
   shell('<h2>Zaloguj się</h2><p class="muted">Podaj służbowy adres e-mail. Wyślemy link, który zaloguje Cię do narzędzia. Dostęp mają osoby dodane do zespołu. Jeśli wiadomość nie przychodzi, poproś administratora narzędzia o link logowania.</p>'+
@@ -368,7 +381,7 @@ async function loginLink(email,fresh,name){
   if(!out||out.error||!out.link){modal('<h2>Nie udało się utworzyć linku</h2><p class="gerr">'+esc((out&&out.error)||'Nieznany błąd.')+'</p><div class="acts"><button class="btn" data-act="team">Wróć do zespołu</button></div>');return;}
   const first=(m.name||'').split(' ')[0];
   const msg=(first?'Cześć '+first+',':'Dzień dobry,')+'\n\nzapraszam do wspólnej pracy nad strukturą organizacyjną Grupy VIZJA. Kliknij poniższy link, żeby zalogować się do narzędzia:\n\n'+out.link+'\n\nLink jest jednorazowy i ważny przez ograniczony czas. Po zalogowaniu wchodzisz na '+location.origin+' i pozostajesz zalogowany/a w tej przeglądarce.\n\n'+(S.members[S.me]&&S.members[S.me].name||'');
-  modal('<h2>Link logowania dla '+esc(who)+'</h2><p class="muted" style="margin-top:0">Wyślij tej osobie link albo gotową wiadomość (e-mail, Teams). Link działa <b>jeden raz</b> i po pewnym czasie wygasa; w razie potrzeby wygeneruj nowy. Nie otwieraj go sam, bo zalogujesz się na konto tej osoby.</p>'+
+  modal('<h2>Link logowania dla '+esc(who)+'</h2><p class="muted" style="margin-top:0">Wyślij tej osobie link albo gotową wiadomość (e-mail, Teams). Link działa <b>jeden raz</b> i po pewnym czasie wygasa; w razie potrzeby wygeneruj nowy. Link prowadzi na stronę narzędzia; logowanie następuje dopiero po kliknięciu przycisku „Zaloguj się”, więc skanery poczty i podgląd w Teams go nie zużyją.</p>'+
     '<div class="field"><label for="llink">Link</label><input type="text" id="llink" readonly value="'+esc(out.link)+'" style="width:100%;font-size:12px"></div>'+
     '<div class="field" style="margin-top:10px"><label for="lmsgt">Gotowa wiadomość</label><textarea id="lmsgt" rows="9" readonly>'+esc(msg)+'</textarea></div>'+
     '<div class="acts"><button class="btn" data-act="team">Wróć do zespołu</button><button class="btn" id="cplink">Kopiuj link</button><button class="btn primary" id="cpmsg">Kopiuj wiadomość</button></div>',true);

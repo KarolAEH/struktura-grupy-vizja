@@ -42,8 +42,11 @@ async function generate(type, email, redirectTo) {
     body: JSON.stringify({ type, email, redirect_to: redirectTo }),
   });
   const j = await r.json().catch(() => ({}));
-  const link = j.action_link || (j.properties && j.properties.action_link);
-  return { ok: r.ok && !!link, link, status: r.status, msg: j.msg || j.message || j.error_description || j.error || '' };
+  const p = j.properties || {};
+  const link = j.action_link || p.action_link;
+  const hashed = j.hashed_token || p.hashed_token;
+  const vtype = j.verification_type || p.verification_type || type;
+  return { ok: r.ok && !!(hashed || link), link, hashed, vtype, status: r.status, msg: j.msg || j.message || j.error_description || j.error || '' };
 }
 
 module.exports = async (req, res) => {
@@ -72,14 +75,21 @@ module.exports = async (req, res) => {
     // 3. Link: dla istniejącego konta „magiclink”, dla nowej osoby „invite” (tworzy konto)
     const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
     const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const redirectTo = proto + '://' + host + '/';
+    const origin = proto + '://' + host;
+    const redirectTo = origin + '/';
     let g = await generate('magiclink', email, redirectTo);
     if (!g.ok) {
       const inv = await generate('invite', email, redirectTo);
       if (inv.ok) g = inv;
     }
     if (!g.ok) return send(res, 502, { error: 'Supabase nie wygenerował linku' + (g.msg ? ': ' + g.msg : '') + '.' });
-    return send(res, 200, { link: g.link, email });
+    // Link prowadzi na stronę narzędzia, a nie bezpośrednio do Supabase: logowanie następuje
+    // dopiero po kliknięciu przycisku. Dzięki temu skanery poczty (np. Defender Safe Links)
+    // i podglądy linków w Teams nie zużyją jednorazowego linku.
+    const link = g.hashed
+      ? origin + '/?logowanie=' + encodeURIComponent(g.hashed) + '&typ=' + encodeURIComponent(g.vtype)
+      : g.link;
+    return send(res, 200, { link, email });
   } catch (e) {
     return send(res, 500, { error: 'Błąd serwera: ' + (e && e.message ? e.message : 'nieznany') });
   }
