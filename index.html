@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Struktura Grupy VIZJA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: top bar (obszar + widoki) / workspace; Struktura = drzewo po lewej + karta węzła po prawej */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --sunk:#eceef2; --ink:#1b2130; --muted:#5d6577; --line:#d9dce3;
+  --accent:#1f4fd1; --accent-soft:#e6ecfb;
+  --l1:#1b2130; --l2:#1f4fd1; --l3:#0f7a6c; --l4:#8a5a00;
+  --ok:#1d7f3f; --ok-bg:#e3f3e8; --warn:#9a6200; --warn-bg:#fbf0d9; --bad:#b3261e; --bad-bg:#fbe5e3; --info:#1f4fd1; --info-bg:#e6ecfb; --none-bg:#eceef2;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151c; --surface:#1a1e27; --sunk:#232834; --ink:#e6e9ef; --muted:#9aa2b3; --line:#2f3542;
+  --accent:#7d9dff; --accent-soft:#1f2a4a;
+  --l1:#e6e9ef; --l2:#7d9dff; --l3:#4cc7b4; --l4:#e0ad4a;
+  --ok:#5fd18a; --ok-bg:#16301f; --warn:#e8b04f; --warn-bg:#33280f; --bad:#ff8a80; --bad-bg:#3a1a18; --info:#7d9dff; --info-bg:#1f2a4a; --none-bg:#232834;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#12151c; --surface:#1a1e27; --sunk:#232834; --ink:#e6e9ef; --muted:#9aa2b3; --line:#2f3542;
+  --accent:#7d9dff; --accent-soft:#1f2a4a;
+  --l1:#e6e9ef; --l2:#7d9dff; --l3:#4cc7b4; --l4:#e0ad4a;
+  --ok:#5fd18a; --ok-bg:#16301f; --warn:#e8b04f; --warn-bg:#33280f; --bad:#ff8a80; --bad-bg:#3a1a18; --info:#7d9dff; --info-bg:#1f2a4a; --none-bg:#232834;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--body);display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+.muted{color:var(--muted)}
+/* top bar */
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.brand{display:flex;flex-direction:column;line-height:1.1}
+.brand h1{font-size:18px;font-weight:700;letter-spacing:.01em}
+.brand span{font-size:12px;color:var(--muted)}
+.areasel{display:flex;gap:6px;align-items:center}
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
+nav.tabs a{padding:6px 10px;border-radius:6px;text-decoration:none;color:var(--muted);font-weight:500}
+nav.tabs a:hover{background:var(--sunk);color:var(--ink)}
+nav.tabs a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.spacer{flex:1}
+.who{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.conn{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.conn.on{background:var(--ok)}
+input[type=search],input[type=text],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+input[type=text]:hover,textarea:hover,select:hover{border-color:var(--muted)}
+textarea{width:100%;resize:vertical;min-height:56px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad)}
+.btn.sm{padding:2px 7px;font-size:12px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+main{flex:1;min-height:0;display:flex}
+.banner{margin:12px 16px 0;padding:10px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn);font-size:13px}
+/* struktura */
+.split{flex:1;display:grid;grid-template-columns:minmax(280px,380px) 1fr;min-height:0}
+.treecol{border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.treetools{padding:10px 12px;display:flex;gap:6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.treetools input{flex:1;min-width:120px}
+.tree{overflow:auto;padding:6px 0 24px;flex:1}
+.trow{display:flex;align-items:flex-start;gap:6px;padding:4px 10px 4px 0;cursor:pointer;border-left:3px solid transparent}
+.trow:hover{background:var(--sunk)}
+.trow.sel{background:var(--accent-soft);border-left-color:var(--accent)}
+.trow .tw{width:18px;flex:none;text-align:center;color:var(--muted);user-select:none;border:0;background:none;padding:0;cursor:pointer;line-height:1.45}
+.trow .nm{flex:1;min-width:0}
+.trow .meta{display:flex;gap:4px;align-items:center;flex:none}
+.lv{font:600 10px/1 var(--display);padding:3px 4px;border-radius:3px;color:var(--surface);flex:none;margin-top:2px;letter-spacing:.03em}
+.lv1{background:var(--l1)}.lv2{background:var(--l2)}.lv3{background:var(--l3)}.lv4{background:var(--l4)}
+.sdot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px}
+.st-szkic{background:var(--muted)}.st-dyskusja{background:var(--warn)}.st-uzgodnione{background:var(--info)}.st-zatwierdzone{background:var(--ok)}
+.ccount{font-size:11px;background:var(--warn-bg);color:var(--warn);border-radius:9px;padding:0 6px;font-weight:600}
+mark{background:var(--warn-bg);color:inherit}
+.detail{overflow:auto;padding:18px 24px 48px;min-width:0}
+.crumbs{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.crumbs a{color:var(--muted)}
+.dhead{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.dhead input.title{font:600 22px/1.2 var(--display);border:1px solid transparent;background:transparent;flex:1;min-width:0;padding:2px 4px;margin-left:-5px}
+.dhead input.title:hover{border-color:var(--line)}
+.dhead input.title:focus{border-color:var(--accent);background:var(--surface)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 16px;margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px;font-weight:500}
+.field select,.field input{width:100%}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+section.card h3{font-size:15px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+section.card h3 .sp{flex:1}
+.hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
+.listed{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;gap:6px;align-items:center}
+.li .num{width:22px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.li input{flex:1;min-width:0}
+table.units{width:100%;border-collapse:collapse}
+table.units th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:4px 6px;border-bottom:1px solid var(--line)}
+table.units td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.units td input{width:100%}
+.ucode{font:600 13px var(--display)}
+.uname{font-size:11px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:9px;white-space:nowrap}
+.c-brak{background:var(--bad-bg);color:var(--bad)}.c-czesciowo{background:var(--warn-bg);color:var(--warn)}.c-dziala{background:var(--ok-bg);color:var(--ok)}.c-nd,.c-{background:var(--none-bg);color:var(--muted)}
+.c-szkic{background:var(--none-bg);color:var(--muted)}.c-dyskusja{background:var(--warn-bg);color:var(--warn)}.c-uzgodnione{background:var(--info-bg);color:var(--info)}.c-zatwierdzone{background:var(--ok-bg);color:var(--ok)}
+.c-model{background:var(--accent-soft);color:var(--accent)}
+.kids .li .lv{margin-top:0}
+.comment{border-left:3px solid var(--warn);padding:6px 10px;background:var(--sunk);border-radius:0 6px 6px 0;margin-bottom:8px}
+.comment.res{border-left-color:var(--line);opacity:.7}
+.comment .ch{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;margin-bottom:2px}
+.comment .ch b{color:var(--ink);font-weight:600}
+.comment p{margin:0;white-space:pre-wrap}
+.loglist{font-size:13px}
+.logi{display:grid;grid-template-columns:130px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.logi time{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.edited{font-size:12px;color:var(--muted)}
+/* mapa */
+.page{flex:1;overflow:auto;padding:18px 20px 40px}
+.page>h2{font-size:20px;margin-bottom:4px}
+.lead{color:var(--muted);margin:0 0 16px;max-width:75ch}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;align-items:start}
+.mcol{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--l2);border-radius:8px;padding:10px}
+.mcol h3{font-size:15px;cursor:pointer;margin-bottom:2px}
+.mcol h3:hover{color:var(--accent)}
+.mcol .sub{font-size:12px;color:var(--muted);margin-bottom:8px}
+.mcard{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:6px;padding:7px 9px;margin-top:6px;cursor:pointer;background:var(--surface)}
+.mcard:hover{border-color:var(--accent)}
+.mcard.st-b-dyskusja{border-left-color:var(--warn)}.mcard.st-b-uzgodnione{border-left-color:var(--info)}.mcard.st-b-zatwierdzone{border-left-color:var(--ok)}.mcard.st-b-szkic{border-left-color:var(--muted)}
+.mcard .t{font-weight:600;font-size:13px}
+.mcard .r{display:flex;gap:6px;align-items:center;margin-top:4px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.udots{display:flex;gap:3px}
+.udot{font:600 9px/1 var(--display);padding:3px 4px;border-radius:3px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:14px;align-items:center}
+/* macierz */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font:600 22px var(--display);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;display:flex;margin-top:6px}
+.bar i{display:block;height:100%}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table.mx{border-collapse:collapse;width:100%;min-width:980px}
+table.mx th,table.mx td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.mx thead th{position:sticky;top:0;background:var(--surface);font-size:12px;color:var(--muted);font-weight:500;z-index:1}
+table.mx tr.grp td{background:var(--sunk);font:600 13px var(--display);color:var(--l2)}
+table.mx td.pn{min-width:200px}
+table.mx td.pn a{color:var(--ink);font-weight:500;text-decoration:none;cursor:pointer}
+table.mx td.pn a:hover{color:var(--accent);text-decoration:underline}
+table.mx select,table.mx input{width:100%;font-size:12px;padding:3px 5px}
+.ucell{display:flex;flex-direction:column;gap:3px;min-width:130px}
+/* uzgodnienia */
+.qgroup{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.qgroup h3{font-size:14px;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.qgroup h3 a{cursor:pointer;color:var(--ink)}
+.qgroup h3 a:hover{color:var(--accent)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,14,22,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal .box{background:var(--surface);border-radius:10px;padding:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto;border:1px solid var(--line)}
+.modal h2{font-size:18px;margin-bottom:10px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:20}
+body:not(.in) .areasel,body:not(.in) nav.tabs,body:not(.in) .hacts,body:not(.in) .who{display:none}
+.modal .box.wide{max-width:860px}
+.hacts{display:flex;gap:2px;flex-wrap:wrap}
+.gate{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 16px;overflow:auto}
+.gbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:440px;width:100%}
+.gbox h2{font-size:22px;margin-bottom:6px}
+.gbox form{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.gbox label{font-size:12px;color:var(--muted);font-weight:500}
+.gbox input{width:100%;padding:8px 10px}
+.gbox code{background:var(--sunk);padding:1px 4px;border-radius:4px;font-size:12px}
+#lmsg{margin-top:10px;font-size:13px}
+.gerr{color:var(--bad);background:var(--bad-bg);padding:8px 10px;border-radius:6px}
+.gok{color:var(--ok);background:var(--ok-bg);padding:8px 10px;border-radius:6px}
+input[type=email]{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+@media (max-width:820px){
+  .split{grid-template-columns:1fr}
+  .treecol{border-right:0;border-bottom:1px solid var(--line);max-height:45vh}
+  main{overflow:auto}
+  .detail{padding:14px 16px 40px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Struktura organizacyjna</h1><span>Grupa VIZJA · model funkcji L1–L4</span></div>
+  <div class="areasel"><label for="area" class="muted" style="font-size:12px">Obszar</label><select id="area"></select><button class="btn sm" data-act="newArea" title="Dodaj nowy obszar (np. Finanse, Kadry)">+ Obszar</button></div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="spacer"></div>
+  <div class="who"><span class="conn" id="conn" title="Łączenie…"></span><span id="me">Łączenie…</span></div>
+  <div class="hacts"><button class="btn sm ghost" data-act="team">Zespół</button><button class="btn sm ghost" data-act="settings">Uczelnie</button><button class="btn sm ghost" data-act="export">Markdown</button><button class="btn sm ghost" data-act="profile">Profil</button><button class="btn sm ghost" data-act="logout">Wyloguj</button></div>
+</header>
+<div id="banner"></div>
+<main id="main"><div class="empty">Ładowanie struktury…</div></main>
+<div id="modal"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+"use strict";
+/* ---------- stałe ---------- */
+const LV={1:'Obszar',2:'Funkcja',3:'Proces',4:'Działanie'};
+const LVC={1:'L1',2:'L2',3:'L3',4:'L4'};
+const STATUS=[['szkic','Szkic'],['dyskusja','Do dyskusji'],['uzgodnione','Uzgodnione'],['zatwierdzone','Zatwierdzone']];
+const MODELS=[['','nie ustalono'],['grupa','Centralnie (Grupa)'],['hybryda','Hybrydowo'],['lokalnie','Lokalnie (uczelnia)']];
+const STATES=[['','—'],['brak','Brak'],['czesciowo','Częściowo'],['dziala','Działa'],['nd','Nie dotyczy']];
+const DEF_UNITS=[{code:'UV',name:'Uniwersytet VIZJA'},{code:'UAFM',name:'UAFM Kraków'},{code:'UZW',name:'UZW'}];
+const VIEWS=[['struktura','Struktura'],['mapa','Mapa funkcji'],['macierz','Macierz odpowiedzialności'],['uzgodnienia','Do uzgodnienia'],['historia','Historia zmian']];
+const lbl=(arr,k)=>(arr.find(a=>a[0]===(k||''))||arr[0])[1];
+
+/* ---------- stan ---------- */
+const S={db:null,me:null,role:null,canWrite:false,isAdmin:false,members:{},online:[],started:false,nodes:new Map(),comments:[],log:[],config:null,
+  view:'struktura',area:null,sel:null,open:new Set(),q:'',names:{},loaded:false,
+  mf:{status:'',model:'*',unit:''},pending:false,readonly:false};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const units=()=>(S.config&&Array.isArray(S.config.units)&&S.config.units.length)?S.config.units:DEF_UNITS;
+const kids=id=>[...S.nodes.values()].filter(n=>n.parent===id).sort((a,b)=>(a.order||0)-(b.order||0)||String(a.name).localeCompare(b.name,'pl'));
+const areas=()=>kids('');
+const path=id=>{const p=[];let n=S.nodes.get(id);while(n){p.unshift(n);n=S.nodes.get(n.parent);}return p;};
+const rootOf=id=>{const p=path(id);return p.length?p[0].id:null;};
+const subtree=id=>{const out=[];const walk=i=>{kids(i).forEach(k=>{out.push(k);walk(k.id);});};walk(id);return out;};
+const openComments=id=>S.comments.filter(c=>c.node===id&&!c.resolved).length;
+const nm=e=>{if(!e)return 'Import';const m=S.members&&S.members[e];return (m&&m.name)||e;};
+const fmt=t=>{if(!t)return'';const d=new Date(t);return d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});};
+const rel=t=>{if(!t)return'';const s=(Date.now()-t)/1000;if(s<60)return'przed chwilą';if(s<3600)return Math.floor(s/60)+' min temu';if(s<86400)return Math.floor(s/3600)+' godz. temu';return fmt(t);};
+function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),2600);}
+
+/* ---------- Supabase: mapowanie wierszy ---------- */
+const COL={name:'name',desc:'descr',note:'note',decisions:'decisions',status:'status',model:'model',owner:'owner',parent:'parent',order:'ord'};
+const toRow=p=>{const o={};for(const k in p){if(COL[k])o[COL[k]]=p[k];}return o;};
+const fromRow=r=>({id:r.id,parent:r.parent||'',level:r.level,order:r.ord||0,name:r.name,desc:r.descr||'',note:r.note||'',decisions:Array.isArray(r.decisions)?r.decisions:[],status:r.status||'szkic',model:r.model||'',owner:r.owner||'',units:r.units||{},updatedAt:Date.parse(r.updated_at)||0,updatedBy:r.updated_by||''});
+const cFrom=r=>({id:r.id,node:r.node,area:r.area,text:r.body,by:r.by_email,at:Date.parse(r.created_at)||0,resolved:!!r.resolved});
+const lFrom=r=>({id:r.id,node:r.node,nodeName:r.node_name,area:r.area,action:r.action,detail:r.detail,by:r.by_email,at:Date.parse(r.at)||0});
+function chk(res){if(res&&res.error)throw res.error;return res?res.data:null;}
+function applyNode(r){S.nodes.set(r.id,fromRow(r));}
+function applySettings(rows){const u=rows.find(r=>r.key==='units');S.config=u?{units:u.value}:null;}
+function applyMembers(rows){S.members={};rows.forEach(m=>S.members[m.email]=m);}
+
+/* ---------- zapis ---------- */
+function rid(){return Math.random().toString(36).slice(2,7);}
+async function logIt(node,action,detail,meta){if(!S.db)return;const n=S.nodes.get(node);
+  const row={node,node_name:(meta&&meta.name)||(n?n.name:''),area:(meta&&meta.area)||(n?rootOf(node):'')||'',action,detail:String(detail||'').slice(0,300)};
+  try{chk(await S.db.from('change_log').insert(row));}catch(e){console.warn('log',e);}}
+function failWrite(e){console.warn(e);const msg=(e&&e.message)||'';
+  if(/row-level security|permission denied/i.test(msg)||(e&&e.code==='42501')){toast('Brak uprawnień do tej zmiany. Uprawnienia nadaje administrator w oknie „Zespół”.');return;}
+  toast('Nie udało się zapisać zmiany'+(msg?': '+msg:'')+'. Spróbuj ponownie.');}
+const writing={};
+async function queued(id,fn){while(writing[id])await writing[id].catch(()=>{});const p=fn();writing[id]=p;try{return await p;}finally{if(writing[id]===p)delete writing[id];}}
+async function saveNode(id,patch,what){if(!S.db||!S.canWrite)return;
+  try{await queued(id,async()=>{const r=chk(await S.db.from('nodes').update(toRow(patch)).eq('id',id).select());if(r&&r[0])applyNode(r[0]);});render();logIt(id,'zmiana',what);}catch(e){failWrite(e);}}
+async function saveUnit(id,unit,field,value,what){if(!S.db||!S.canWrite)return;
+  try{await queued(id,async()=>{chk(await S.db.rpc('set_unit',{p_node:id,p_unit:unit,p_field:field,p_value:value}));const n=S.nodes.get(id);if(n){const u=Object.assign({},n.units);u[unit]=Object.assign({},u[unit],{[field]:value});n.units=u;n.updatedAt=Date.now();n.updatedBy=S.me;}});render();logIt(id,'zmiana',what);}catch(e){failWrite(e);}}
+async function createNode(parent,level,name){if(!S.db||!S.canWrite)return null;
+  const sib=kids(parent);const ord=sib.reduce((m,s)=>Math.max(m,s.order||0),0)+1;
+  const id=(parent?parent+'-':'')+rid();
+  const unitsObj={};units().forEach(u=>unitsObj[u.code]={who:'',state:''});
+  const row={id,parent,level,ord,name:name||('Nowy element: '+LV[level].toLowerCase()),descr:'',note:'',decisions:[],status:'szkic',model:'',owner:'',units:unitsObj};
+  try{const r=chk(await S.db.from('nodes').insert(row).select());applyNode(r[0]);logIt(id,'dodano',LV[level]+' „'+row.name+'”');return id;}catch(e){failWrite(e);return null;}}
+async function deleteNode(id){const all=[S.nodes.get(id),...subtree(id)].filter(Boolean);const top=all[0];const meta={name:top.name,area:rootOf(id)};
+  try{chk(await S.db.from('nodes').delete().in('id',all.map(n=>n.id)));all.forEach(n=>S.nodes.delete(n.id));}catch(e){failWrite(e);return;}
+  logIt(id,'usunięto',LV[top.level]+' „'+top.name+'”'+(all.length>1?' wraz z '+(all.length-1)+' elementami podrzędnymi':''),meta);
+  if(top.level===1){const a=areas()[0];S.area=a?a.id:null;}
+  select(top.parent||S.area||null);}
+async function moveOrder(id,dir){const n=S.nodes.get(id);const sib=kids(n.parent);const i=sib.findIndex(s=>s.id===id);const j=i+dir;if(j<0||j>=sib.length)return;
+  const arr=sib.slice();[arr[i],arr[j]]=[arr[j],arr[i]];
+  for(let k=0;k<arr.length;k++){if((arr[k].order||0)!==k+1){try{chk(await S.db.from('nodes').update({ord:k+1}).eq('id',arr[k].id));arr[k].order=k+1;}catch(e){failWrite(e);return;}}}
+  render(true);logIt(id,'zmiana','kolejność');}
+
+/* ---------- logowanie i połączenie z bazą ---------- */
+function banner(t){$('#banner').innerHTML=t?'<div class="banner">'+esc(t)+'</div>':'';}
+let sb=null;
+function shell(html){S.loaded=false;$('#main').innerHTML='<div class="gate"><div class="gbox">'+html+'</div></div>';}
+async function boot(){
+  let cfg=null;
+  try{const r=await fetch('/api/config',{cache:'no-store'});if(r.ok)cfg=await r.json();}catch(e){}
+  if(!cfg||!cfg.url||!cfg.anonKey){shell('<h2>Brak konfiguracji bazy</h2><p>Aplikacja nie zna adresu projektu Supabase. W Vercelu: Settings → Environment Variables dodaj <code>SUPABASE_URL</code> i <code>SUPABASE_ANON_KEY</code> (albo połącz projekt z integracją Supabase), a potem wykonaj ponowne wdrożenie.</p>');return;}
+  if(!window.supabase||!window.supabase.createClient){shell('<h2>Nie udało się wczytać biblioteki</h2><p>Sprawdź połączenie z internetem i odśwież stronę.</p>');return;}
+  sb=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{flowType:'implicit',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
+  sb.auth.onAuthStateChange((ev,sess)=>{
+    if(sess&&!S.started){S.session=sess;start();}
+    if(ev==='SIGNED_OUT'){history.replaceState(null,'',location.pathname);location.reload();}});
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session){S.session=data.session;start();}
+  else if(!S.started){const err=new URLSearchParams((location.hash||'').slice(1)).get('error_description');showLogin(err);}
+}
+function showLogin(err){
+  if(/access_token|error/.test(location.hash))history.replaceState(null,'',location.pathname);
+  shell('<h2>Zaloguj się</h2><p class="muted">Podaj służbowy adres e-mail. Wyślemy link, który zaloguje Cię do narzędzia. Dostęp mają osoby dodane do zespołu.</p>'+
+   (err?'<p class="gerr">Link logowania nie zadziałał ('+esc(err)+'). Wyślij nowy.</p>':'')+
+   '<form id="loginf"><label for="lem">Adres e-mail</label><input type="email" id="lem" required autocomplete="email" placeholder="imie.nazwisko@uczelnia.pl"><button class="btn primary" type="submit" id="lbtn">Wyślij link logowania</button></form><div id="lmsg" role="status"></div>');
+  $('#loginf').onsubmit=async e=>{e.preventDefault();const em=$('#lem').value.trim().toLowerCase();if(!em)return;const b=$('#lbtn');b.disabled=true;const msg=$('#lmsg');msg.className='';msg.textContent='Wysyłanie…';
+    try{const ok=chk(await sb.rpc('is_allowed_email',{p_email:em}));
+      if(ok===false){msg.className='gerr';msg.textContent='Ten adres nie jest na liście zespołu. Poproś administratora narzędzia o dodanie go w oknie „Zespół”.';b.disabled=false;return;}
+      chk(await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}}));
+      msg.className='gok';msg.textContent='Gotowe. Sprawdź skrzynkę '+em+' i kliknij link w wiadomości (sprawdź też folder spam). Tę kartę możesz zamknąć.';
+    }catch(err){const m=(err&&err.message)||'';msg.className='gerr';
+      msg.textContent=/not authorized/i.test(m)?'Serwer pocztowy Supabase nie może wysłać wiadomości na ten adres. Administrator musi skonfigurować własny SMTP (instrukcja w README).':/rate limit|seconds/i.test(m)?'Za dużo prób w krótkim czasie. Odczekaj chwilę i spróbuj ponownie.':'Nie udało się wysłać linku: '+m;
+      b.disabled=false;}};}
+async function start(){if(S.started)return;S.started=true;
+  if(/access_token|error/.test(location.hash))history.replaceState(null,'',location.pathname);
+  readHash();
+  S.me=((S.session.user&&S.session.user.email)||'').toLowerCase();
+  let role=null;
+  try{role=chk(await sb.rpc('my_role'));}catch(e){}
+  if(!role){try{role=chk(await sb.rpc('claim_first_admin'));}catch(e){}}
+  if(!role){shell('<h2>Brak dostępu</h2><p>Adres <b>'+esc(S.me)+'</b> nie jest na liście zespołu. Poproś administratora narzędzia o dodanie go w oknie „Zespół”.</p><button class="btn" data-act="logout">Wyloguj</button>');return;}
+  S.db=sb;S.role=role;S.canWrite=role==='editor'||role==='admin';S.isAdmin=role==='admin';
+  $('#conn').classList.add('on');document.body.classList.add('in');
+  if(!S.canWrite)banner('Masz rolę „podgląd”: możesz przeglądać i komentować. Uprawnienia do edycji nadaje administrator w oknie „Zespół”.');
+  $('#main').innerHTML='<div class="empty">Wczytywanie struktury…</div>';
+  await loadAll();subscribe();
+  const mine=S.members[S.me];if(mine&&!mine.name)profileBox(true);
+}
+async function loadAll(){
+  const [n,c,l,s,m]=await Promise.all([
+    sb.from('nodes').select('*').limit(5000),
+    sb.from('comments').select('*').order('created_at',{ascending:true}).limit(5000),
+    sb.from('change_log').select('*').order('at',{ascending:false}).limit(300),
+    sb.from('settings').select('*'),
+    sb.from('members').select('*').order('email')]);
+  if(n.error){banner('Nie udało się wczytać danych: '+n.error.message);return;}
+  S.nodes=new Map(n.data.map(r=>[r.id,fromRow(r)]));
+  S.comments=(c.data||[]).map(cFrom);S.log=(l.data||[]).map(lFrom);
+  applySettings(s.data||[]);applyMembers(m.data||[]);
+  S.loaded=true;afterNodes();renderWho();render(true);}
+function afterNodes(){
+  if(!S.area||!S.nodes.has(S.area)){const a=areas()[0];S.area=a?a.id:null;}
+  if(S.sel&&!S.nodes.has(S.sel))S.sel=null;
+  if(!S.openInit&&S.area){S.open.add(S.area);kids(S.area).forEach(k=>S.open.add(k.id));S.openInit=true;}}
+const refT={};
+function refetch(t){clearTimeout(refT[t]);refT[t]=setTimeout(async()=>{try{
+  if(t==='comments'){S.comments=chk(await sb.from('comments').select('*').order('created_at',{ascending:true}).limit(5000)).map(cFrom);}
+  if(t==='settings'){applySettings(chk(await sb.from('settings').select('*')));}
+  if(t==='members'){applyMembers(chk(await sb.from('members').select('*').order('email')));const me=S.members[S.me];
+    if(me&&me.role!==S.role){location.reload();return;} if(!me){location.reload();return;} renderWho();if($('#teamlist'))teamBox();}
+  render();}catch(e){console.warn(e);}},250);}
+function subscribe(){
+  sb.channel('zmiany')
+    .on('postgres_changes',{event:'*',schema:'public',table:'nodes'},p=>{if(p.eventType==='DELETE'){if(p.old&&p.old.id)S.nodes.delete(p.old.id);}else if(p.new&&p.new.id)applyNode(p.new);afterNodes();render();})
+    .on('postgres_changes',{event:'*',schema:'public',table:'comments'},()=>refetch('comments'))
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'change_log'},p=>{if(p.new&&!S.log.some(l=>l.id===p.new.id)){S.log.unshift(lFrom(p.new));S.log.length=Math.min(S.log.length,300);render();}})
+    .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>refetch('settings'))
+    .on('postgres_changes',{event:'*',schema:'public',table:'members'},()=>refetch('members'))
+    .subscribe(st=>{const c=$('#conn');if(c){c.classList.toggle('on',st==='SUBSCRIBED');c.title=st==='SUBSCRIBED'?'Połączono: zmiany zespołu widać na żywo':'Brak połączenia na żywo – odśwież stronę';}});
+  const pres=sb.channel('obecni',{config:{presence:{key:S.me}}});
+  pres.on('presence',{event:'sync'},()=>{S.online=Object.keys(pres.presenceState());renderWho();})
+    .subscribe(async st=>{if(st==='SUBSCRIBED'){try{await pres.track({at:Date.now()});}catch(e){}}});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadAll();});
+}
+const ROLES=[['viewer','Podgląd i komentarze'],['editor','Edycja'],['admin','Administrator']];
+function renderWho(){const me=$('#me');if(!me||!S.me)return;
+  const others=(S.online||[]).filter(e=>e!==S.me);
+  me.innerHTML='<b>'+esc(nm(S.me))+'</b> · '+esc(lbl(ROLES,S.role))+(others.length?' · <span title="'+esc(others.map(nm).join(', '))+'">teraz online: '+esc(others.map(nm).slice(0,3).join(', '))+(others.length>3?' +'+(others.length-3):'')+'</span>':'');}
+function profileBox(first){const m=S.members[S.me]||{};
+  modal('<h2>'+(first?'Witaj w narzędziu':'Twój profil')+'</h2><p class="muted" style="margin-top:0">Imię i nazwisko pokazujemy przy komentarzach i w historii zmian.</p><div class="grid2"><div class="field"><label for="pn">Imię i nazwisko</label><input type="text" id="pn" value="'+esc(m.name||'')+'"></div><div class="field"><label for="pu">Uczelnia</label><select id="pu"><option value="">—</option>'+units().map(u=>'<option value="'+esc(u.code)+'"'+(m.unit===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'<option value="GRUPA"'+(m.unit==='GRUPA'?' selected':'')+'>Grupa VIZJA</option></select></div></div><div class="acts"><button class="btn" data-act="mclose">'+(first?'Później':'Anuluj')+'</button><button class="btn primary" id="psave">Zapisz</button></div>');
+  $('#psave').onclick=async()=>{try{chk(await sb.from('members').update({name:$('#pn').value.trim(),unit:$('#pu').value}).eq('email',S.me));closeModal();refetch('members');}catch(e){failWrite(e);}};}
+function teamBox(){const list=Object.values(S.members).sort((a,b)=>(a.unit||'').localeCompare(b.unit||'')||(a.name||a.email).localeCompare(b.name||b.email,'pl'));const A=S.isAdmin;
+  const uopts=v=>'<option value="">—</option>'+units().map(u=>'<option value="'+esc(u.code)+'"'+(v===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'<option value="GRUPA"'+(v==='GRUPA'?' selected':'')+'>Grupa</option>';
+  modal('<h2>Zespół ('+list.length+')</h2><p class="muted" style="margin-top:0">'+(A?'Dodaj osoby, które mają pracować nad strukturą. Po dodaniu mogą zalogować się linkiem wysłanym na ten adres.':'Osoby z dostępem do narzędzia. Listą zarządza administrator.')+'</p>'+
+   '<div style="overflow-x:auto"><table class="units" id="teamlist"><thead><tr><th>E-mail</th><th>Imię i nazwisko</th><th>Uczelnia</th><th>Rola</th>'+(A?'<th></th>':'')+'</tr></thead><tbody>'+
+   list.map(m=>'<tr><td style="font-size:12px">'+esc(m.email)+'</td>'+(A?'<td><input type="text" data-mem="'+esc(m.email)+'" data-mf2="name" value="'+esc(m.name)+'" aria-label="Imię i nazwisko"></td><td><select data-mem="'+esc(m.email)+'" data-mf2="unit" aria-label="Uczelnia">'+uopts(m.unit)+'</select></td><td><select data-mem="'+esc(m.email)+'" data-mf2="role" aria-label="Rola"'+(m.email===S.me?' disabled title="Nie możesz zmienić własnej roli"':'')+'>'+opts(ROLES,m.role)+'</select></td><td>'+(m.email===S.me?'':'<button class="btn sm ghost danger" data-act="memdel" data-mem="'+esc(m.email)+'" aria-label="Usuń">✕</button>')+'</td>':'<td>'+esc(m.name)+'</td><td>'+esc(m.unit)+'</td><td>'+esc(lbl(ROLES,m.role))+'</td>')+'</tr>').join('')+'</tbody></table></div>'+
+   (A?'<h3 style="font-size:14px;margin:14px 0 6px">Dodaj osobę</h3><form id="memadd" class="grid2" style="align-items:end"><div class="field"><label for="ne">E-mail</label><input type="email" id="ne" required placeholder="imie.nazwisko@uczelnia.pl"></div><div class="field"><label for="nn">Imię i nazwisko</label><input type="text" id="nn"></div><div class="field"><label for="nu">Uczelnia</label><select id="nu">'+uopts('')+'</select></div><div class="field"><label for="nr">Rola</label><select id="nr">'+opts(ROLES,'editor')+'</select></div><div class="field"><button class="btn primary" type="submit">Dodaj do zespołu</button></div></form>':'')+
+   '<div class="acts"><button class="btn" data-act="mclose">Zamknij</button></div>',true);
+  if(A){$('#memadd').onsubmit=async e=>{e.preventDefault();const em=$('#ne').value.trim().toLowerCase();if(!em)return;
+      try{chk(await sb.from('members').upsert({email:em,name:$('#nn').value.trim(),unit:$('#nu').value,role:$('#nr').value}));toast('Dodano '+em+'. Ta osoba może się teraz zalogować.');refetch('members');}catch(err){failWrite(err);}};}}
+
+/* ---------- routing ---------- */
+function readHash(){const h=(location.hash||'').slice(1);
+  if(h.startsWith('w-')){const id=h.slice(2);S.view='struktura';S.sel=id;S.hashSel=id;return;}
+  S.view=VIEWS.some(v=>v[0]===h)?h:'struktura';}
+function setHash(v){const h='#'+v;if(location.hash!==h){history.replaceState(null,'',h);}}
+function select(id,view){S.sel=id;if(id){const r=rootOf(id);if(r)S.area=r;path(id).forEach(p=>p.id!==id&&S.open.add(p.id));}
+  S.view=view||'struktura';setHash(id&&S.view==='struktura'?'w-'+id:S.view);render(true);
+  if(id){requestAnimationFrame(()=>{const el=document.querySelector('.trow.sel');if(el)el.scrollIntoView({block:'nearest'});});}}
+window.addEventListener('hashchange',()=>{if(/access_token|error/.test(location.hash))return;readHash();render(true);});
+
+/* ---------- render ---------- */
+function editing(){const a=document.activeElement;return a&&$('#main').contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.type!=='search';}
+document.addEventListener('focusout',()=>{setTimeout(()=>{if(S.pending&&!editing()){S.pending=false;render();}},0);});
+function render(force){
+  renderTop();
+  if(!force&&editing()){S.pending=true;return;}
+  S.pending=false;
+  const main=$('#main');
+  if(!S.loaded){return;}
+  if(S.hashSel&&S.nodes.has(S.hashSel)){const id=S.hashSel;S.hashSel=null;S.area=rootOf(id);path(id).forEach(p=>S.open.add(p.id));}
+  if(!areas().length){main.innerHTML='<div class="empty"><h2>Brak obszarów</h2><p>Zacznij od dodania pierwszego obszaru, np. „Obszar IT”.</p>'+(S.db&&S.canWrite?'<button class="btn primary" data-act="newArea">Dodaj obszar</button>':'')+'</div>';return;}
+  const keep=main.querySelector('.detail,.page');const st=keep?keep.scrollTop:0;const tr=main.querySelector('.tree');const tst=tr?tr.scrollTop:0;
+  main.innerHTML=({struktura:vStruktura,mapa:vMapa,macierz:vMacierz,uzgodnienia:vUzg,historia:vHist}[S.view]||vStruktura)();
+  if(!force){const k2=main.querySelector('.detail,.page');if(k2)k2.scrollTop=st;const t2=main.querySelector('.tree');if(t2)t2.scrollTop=tst;}
+  else {const t2=main.querySelector('.tree');if(t2)t2.scrollTop=tst;}
+}
+function renderTop(){
+  const sel=$('#area');const as=areas();
+  sel.innerHTML=as.map(a=>'<option value="'+esc(a.id)+'"'+(a.id===S.area?' selected':'')+'>'+esc(a.name)+'</option>').join('')||'<option>—</option>';
+  $('#tabs').innerHTML=VIEWS.map(([k,v])=>{let extra='';if(k==='uzgodnienia'){const n=S.comments.filter(c=>!c.resolved&&rootOf(c.node)===S.area).length;if(n)extra=' <span class="ccount">'+n+'</span>';}
+    return '<a href="#'+k+'" data-view="'+k+'"'+(S.view===k?' aria-current="page"':'')+'>'+v+extra+'</a>';}).join('');
+  document.querySelectorAll('[data-act="newArea"]').forEach(b=>b.disabled=!(S.db&&S.canWrite));
+}
+function ro(){return !(S.db&&S.canWrite)?' disabled':'';}
+function opts(arr,val){return arr.map(([k,v])=>'<option value="'+k+'"'+((val||'')===k?' selected':'')+'>'+esc(v)+'</option>').join('');}
+
+/* drzewo */
+function matchQ(n){if(!S.q)return true;const q=S.q.toLowerCase();return (n.name||'').toLowerCase().includes(q)||(n.desc||'').toLowerCase().includes(q)||(n.owner||'').toLowerCase().includes(q)||Object.values(n.units||{}).some(u=>(u.who||'').toLowerCase().includes(q));}
+function hl(t){t=esc(t);if(!S.q)return t;const q=S.q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return t.replace(new RegExp('('+esc(q)+')','ig'),'<mark>$1</mark>');}
+function treeRows(id,depth){let out='';for(const n of kids(id)){
+  const sub=subtree(n.id);const vis=matchQ(n)||sub.some(matchQ);if(!vis)continue;
+  const has=kids(n.id).length>0;const open=S.q?true:S.open.has(n.id);const cc=openComments(n.id);
+  out+='<div class="trow'+(S.sel===n.id?' sel':'')+'" data-sel="'+esc(n.id)+'" style="padding-left:'+(6+depth*16)+'px">'+
+   (has?'<button class="tw" data-tog="'+esc(n.id)+'" aria-label="'+(open?'Zwiń':'Rozwiń')+'">'+(open?'▾':'▸')+'</button>':'<span class="tw"></span>')+
+   '<span class="lv lv'+n.level+'">'+LVC[n.level]+'</span><span class="nm">'+hl(n.name)+'</span><span class="meta">'+(cc?'<span class="ccount" title="Otwarte komentarze">'+cc+'</span>':'')+'<span class="sdot st-'+esc(n.status||'szkic')+'" title="'+esc(lbl(STATUS,n.status))+'"></span></span></div>';
+  if(has&&open)out+=treeRows(n.id,depth+1);}
+  return out;}
+function vStruktura(){
+  const area=S.nodes.get(S.area);
+  if(!S.sel||rootOf(S.sel)!==S.area)S.sel=S.area;
+  const n=S.nodes.get(S.sel);
+  return '<div class="split"><div class="treecol"><div class="treetools"><input type="search" id="q" placeholder="Szukaj w obszarze: nazwa, opis, osoba" value="'+esc(S.q)+'" aria-label="Szukaj"><button class="btn sm" data-act="expandAll">Rozwiń</button><button class="btn sm" data-act="collapseAll">Zwiń</button></div>'+
+   '<div class="tree" role="tree">'+
+   '<div class="trow'+(S.sel===area.id?' sel':'')+'" data-sel="'+esc(area.id)+'" style="padding-left:6px"><span class="tw"></span><span class="lv lv1">L1</span><span class="nm"><b>'+esc(area.name)+'</b></span><span class="meta">'+(openComments(area.id)?'<span class="ccount">'+openComments(area.id)+'</span>':'')+'<span class="sdot st-'+esc(area.status||'szkic')+'"></span></span></div>'+
+   treeRows(area.id,1)+'</div></div><div class="detail">'+(n?detail(n):'')+'</div></div>';}
+
+function detail(n){
+  const p=path(n.id);const R=ro();
+  let h='<div class="crumbs">'+p.map((x,i)=>i<p.length-1?'<a href="#w-'+esc(x.id)+'" data-sel="'+esc(x.id)+'">'+esc(x.name)+'</a> ›':'').join(' ')+'</div>';
+  h+='<div class="dhead"><span class="lv lv'+n.level+'" style="font-size:12px;padding:4px 6px">'+LVC[n.level]+' · '+LV[n.level]+'</span><input class="title" data-f="name" data-id="'+esc(n.id)+'" value="'+esc(n.name)+'" aria-label="Nazwa"'+R+'></div>';
+  h+='<div class="edited">Ostatnia zmiana: '+esc(nm(n.updatedBy))+', '+esc(rel(n.updatedAt))+'</div><div style="height:10px"></div>';
+  h+='<div class="grid2"><div class="field"><label for="f-status">Status uzgodnienia</label><select id="f-status" data-f="status" data-id="'+esc(n.id)+'"'+R+'>'+opts(STATUS,n.status||'szkic')+'</select></div>';
+  if(n.level>=2&&n.level<=3)h+='<div class="field"><label for="f-model">Model realizacji w Grupie</label><select id="f-model" data-f="model" data-id="'+esc(n.id)+'"'+R+'>'+opts(MODELS,n.model)+'</select></div>';
+  h+='<div class="field"><label for="f-owner">'+(n.level<=2?'Właściciel na poziomie Grupy':n.level===3?'Właściciel procesu (Grupa)':'Wykonawca / rola')+'</label><input type="text" id="f-owner" data-f="owner" data-id="'+esc(n.id)+'" value="'+esc(n.owner)+'" placeholder="Rola lub osoba"'+R+'></div></div>';
+  h+='<section class="card"><h3>'+(n.level===1?'Cel obszaru':n.level===4?'Opis działania':'Za co odpowiada')+'</h3><textarea data-f="desc" data-id="'+esc(n.id)+'" rows="3"'+R+'>'+esc(n.desc)+'</textarea>';
+  if(n.level<=2)h+='<div class="field" style="margin-top:8px"><label for="f-note">Opis rozszerzony</label><textarea id="f-note" data-f="note" data-id="'+esc(n.id)+'" rows="3"'+R+'>'+esc(n.note)+'</textarea></div>';
+  h+='</section>';
+  if(n.level<=3){const d=Array.isArray(n.decisions)?n.decisions:[];
+    h+='<section class="card"><h3>'+(n.level===2?'Typowe decyzje L2':n.level===3?'Decyzje L3':'Zasady obszaru')+'<span class="sp"></span>'+(R?'':'<button class="btn sm" data-act="addDec" data-id="'+esc(n.id)+'">+ Decyzja</button>')+'</h3><div class="hint">'+(n.level===2?'Jakiego rodzaju decyzje organizacyjne podejmuje funkcja.':n.level===3?'Zasady, standardy, terminy i wyjątki, które ustala proces.':'Zasady wspólne dla całego obszaru.')+'</div><div class="listed">'+
+      (d.length?d.map((x,i)=>'<div class="li"><span class="num">'+(i+1)+'.</span><input type="text" data-dec="'+i+'" data-id="'+esc(n.id)+'" value="'+esc(x)+'" aria-label="Decyzja '+(i+1)+'"'+R+'>'+(R?'':'<button class="btn sm ghost danger" data-act="delDec" data-i="'+i+'" data-id="'+esc(n.id)+'" aria-label="Usuń decyzję">✕</button>')+'</div>').join(''):'<div class="muted">Brak zapisanych decyzji.</div>')+'</div></section>';}
+  if(n.level>=2){const U=units();const uo=n.units||{};
+    h+='<section class="card"><h3>Realizacja w uczelniach</h3><div class="hint">Kto odpowiada w danej uczelni i na jakim etapie jest wdrożenie.</div><div style="overflow-x:auto"><table class="units"><thead><tr><th>Uczelnia</th><th>Odpowiedzialny lokalnie</th><th style="width:150px">Stan</th><th>Uwagi</th></tr></thead><tbody>'+
+     U.map(u=>{const v=uo[u.code]||{};return '<tr><td><div class="ucode">'+esc(u.code)+'</div><div class="uname">'+esc(u.name)+'</div></td><td><input type="text" data-u="'+esc(u.code)+'" data-uf="who" data-id="'+esc(n.id)+'" value="'+esc(v.who)+'" placeholder="Rola / osoba" aria-label="Odpowiedzialny '+esc(u.code)+'"'+R+'></td><td><select data-u="'+esc(u.code)+'" data-uf="state" data-id="'+esc(n.id)+'" aria-label="Stan '+esc(u.code)+'"'+R+'>'+opts(STATES,v.state)+'</select></td><td><input type="text" data-u="'+esc(u.code)+'" data-uf="note" data-id="'+esc(n.id)+'" value="'+esc(v.note)+'" aria-label="Uwagi '+esc(u.code)+'"'+R+'></td></tr>';}).join('')+'</tbody></table></div></section>';}
+  if(n.level<4){const ks=kids(n.id);const cl=n.level+1;
+    h+='<section class="card kids"><h3>'+({2:'Funkcje L2',3:'Procesy L3',4:'Działania L4'}[cl])+' <span class="muted" style="font-weight:400">('+ks.length+')</span><span class="sp"></span>'+(R?'':'<button class="btn sm" data-act="addKid" data-id="'+esc(n.id)+'">+ '+LV[cl]+'</button>')+'</h3><div class="listed">'+
+     (ks.length?ks.map((k,i)=>'<div class="li"><span class="lv lv'+k.level+'">'+LVC[k.level]+'</span>'+
+       (cl===4?'<input type="text" data-f="name" data-id="'+esc(k.id)+'" value="'+esc(k.name)+'" aria-label="Działanie"'+R+'>':'<a href="#w-'+esc(k.id)+'" data-sel="'+esc(k.id)+'" style="flex:1;color:var(--ink)">'+esc(k.name)+'</a><span class="chip c-'+esc(k.status||'szkic')+'">'+esc(lbl(STATUS,k.status))+'</span>')+
+       (R?'':'<button class="btn sm ghost" data-act="up" data-id="'+esc(k.id)+'" aria-label="Wyżej"'+(i===0?' disabled':'')+'>↑</button><button class="btn sm ghost" data-act="down" data-id="'+esc(k.id)+'" aria-label="Niżej"'+(i===ks.length-1?' disabled':'')+'>↓</button>')+
+       (cl===4?'<button class="btn sm ghost" data-sel="'+esc(k.id)+'" aria-label="Otwórz">Otwórz</button>':'')+'</div>').join(''):'<div class="muted">Brak elementów.</div>')+'</div></section>';}
+  // komentarze
+  const cs=S.comments.filter(c=>c.node===n.id);
+  h+='<section class="card"><h3>Dyskusja <span class="muted" style="font-weight:400">('+cs.filter(c=>!c.resolved).length+' otwartych)</span></h3>'+
+    (cs.length?cs.map(c=>'<div class="comment'+(c.resolved?' res':'')+'"><div class="ch"><b>'+esc(nm(c.by))+'</b><span>'+esc(fmt(c.at))+'</span>'+(c.resolved?'<span class="chip c-zatwierdzone">rozwiązane</span>':'')+'<span class="spacer"></span>'+(R?'':'<button class="btn sm ghost" data-act="'+(c.resolved?'reopen':'resolve')+'" data-cid="'+esc(c.id)+'">'+(c.resolved?'Otwórz ponownie':'Oznacz jako rozwiązane')+'</button>')+'</div><p>'+esc(c.text)+'</p></div>').join(''):'<div class="muted" style="margin-bottom:8px">Brak komentarzy. Zapisz pytanie lub propozycję zmiany dla zespołu.</div>')+
+    (S.db?'<textarea id="newc" rows="2" placeholder="Komentarz, pytanie lub propozycja dla zespołu…" aria-label="Nowy komentarz"></textarea><div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn primary sm" data-act="comment" data-id="'+esc(n.id)+'">Dodaj komentarz</button></div>':'')+'</section>';
+  // zarządzanie
+  if(!R){const possible=[...S.nodes.values()].filter(x=>x.level===n.level-1&&x.id!==n.parent).sort((a,b)=>path(a.id).map(p=>p.name).join('/').localeCompare(path(b.id).map(p=>p.name).join('/'),'pl'));
+    h+='<section class="card"><h3>Zarządzanie elementem</h3><div class="grid2">'+
+      (n.level>1?'<div class="field"><label for="mv">Przenieś pod inny element ('+LV[n.level-1].toLowerCase()+')</label><select id="mv" data-act-change="move" data-id="'+esc(n.id)+'"><option value="">— wybierz —</option>'+possible.map(x=>'<option value="'+esc(x.id)+'">'+esc(path(x.id).slice(n.level>2?1:0).map(p=>p.name).join(' › '))+'</option>').join('')+'</select></div>':'')+
+      '<div class="field"><label>&nbsp;</label><button class="btn danger" data-act="del" data-id="'+esc(n.id)+'">Usuń '+LV[n.level].toLowerCase()+(kids(n.id).length?' z elementami podrzędnymi':'')+'</button></div></div></section>';}
+  // historia węzła
+  const hl2=S.log.filter(l=>l.node===n.id).slice(0,8);
+  if(hl2.length)h+='<section class="card"><h3>Ostatnie zmiany elementu</h3><div class="loglist">'+hl2.map(l=>'<div class="logi"><time>'+esc(fmt(l.at))+'</time><span><b>'+esc(nm(l.by))+'</b> · '+esc(l.action)+(l.detail?': '+esc(l.detail):'')+'</span></div>').join('')+'</div></section>';
+  return h;}
+
+/* mapa */
+function udots(n){return '<span class="udots">'+units().map(u=>{const s=((n.units||{})[u.code]||{}).state||'';return '<span class="udot c-'+esc(s)+'" title="'+esc(u.code+': '+lbl(STATES,s))+'">'+esc(u.code)+'</span>';}).join('')+'</span>';}
+function vMapa(){const a=S.nodes.get(S.area);const l2=kids(a.id);
+  return '<div class="page"><h2>'+esc(a.name)+': mapa funkcji i procesów</h2><p class="lead">'+esc(a.desc||'')+'</p>'+
+  '<div class="legend"><span>Pasek karty: status uzgodnienia</span>'+STATUS.map(([k,v])=>'<span class="chip c-'+k+'">'+v+'</span>').join('')+'<span style="margin-left:10px">Znaczniki uczelni: stan wdrożenia</span>'+STATES.slice(1).map(([k,v])=>'<span class="chip c-'+k+'">'+v+'</span>').join('')+'</div>'+
+  '<div class="map">'+l2.map(f=>{const ps=kids(f.id);return '<div class="mcol"><h3 data-sel="'+esc(f.id)+'">'+esc(f.name)+'</h3><div class="sub">'+ps.length+' procesów · '+esc(lbl(MODELS,f.model))+(f.owner?' · '+esc(f.owner):'')+'</div>'+
+    ps.map(p=>{const cc=openComments(p.id);return '<div class="mcard st-b-'+esc(p.status||'szkic')+'" data-sel="'+esc(p.id)+'" tabindex="0"><div class="t">'+esc(p.name)+'</div><div class="r">'+udots(p)+'<span>'+kids(p.id).length+' dział.</span>'+(p.model?'<span class="chip c-model">'+esc(lbl(MODELS,p.model))+'</span>':'')+(cc?'<span class="ccount">'+cc+' kom.</span>':'')+'</div></div>';}).join('')+
+    (S.db&&S.canWrite?'<button class="btn sm ghost" style="margin-top:6px" data-act="addKid" data-id="'+esc(f.id)+'">+ Proces</button>':'')+'</div>';}).join('')+'</div></div>';}
+
+/* macierz */
+function vMacierz(){const a=S.nodes.get(S.area);const U=units();const R=ro();
+  const l2=kids(a.id);const all=[];l2.forEach(f=>kids(f.id).forEach(p=>all.push(p)));
+  const st={};STATUS.forEach(([k])=>st[k]=0);all.forEach(p=>st[p.status||'szkic']++);
+  const cov=U.map(u=>{const c={};STATES.forEach(([k])=>c[k]=0);all.forEach(p=>c[((p.units||{})[u.code]||{}).state||'']++);return {u,c};});
+  const T=all.length||1;
+  let h='<div class="page"><h2>Macierz odpowiedzialności: procesy L3 × uczelnie</h2><p class="lead">Kto odpowiada za każdy proces na poziomie Grupy i w każdej uczelni. Zmiany zapisują się od razu i są widoczne dla całego zespołu.</p>';
+  h+='<div class="tiles"><div class="tile"><div class="k">Procesy L3</div><div class="v">'+all.length+'</div><div class="bar">'+STATUS.map(([k])=>'<i class="st-'+k+'" style="width:'+(st[k]/T*100)+'%"></i>').join('')+'</div><div class="k" style="margin-top:4px">'+STATUS.map(([k,v])=>v+' '+st[k]).join(' · ')+'</div></div>'+
+    '<div class="tile"><div class="k">Z ustalonym modelem realizacji</div><div class="v">'+all.filter(p=>p.model).length+' / '+all.length+'</div></div>'+
+    '<div class="tile"><div class="k">Z właścicielem na poziomie Grupy</div><div class="v">'+all.filter(p=>(p.owner||'').trim()).length+' / '+all.length+'</div></div>'+
+    cov.map(({u,c})=>'<div class="tile"><div class="k">'+esc(u.code)+': działa / częściowo / brak</div><div class="v">'+c.dziala+' / '+c.czesciowo+' / '+c.brak+'</div><div class="bar"><i style="width:'+(c.dziala/T*100)+'%;background:var(--ok)"></i><i style="width:'+(c.czesciowo/T*100)+'%;background:var(--warn)"></i><i style="width:'+(c.brak/T*100)+'%;background:var(--bad)"></i></div></div>').join('')+'</div>';
+  h+='<div class="filters"><label class="muted" for="mfs">Status</label><select id="mfs" data-mf="status"><option value="">wszystkie</option>'+STATUS.map(([k,v])=>'<option value="'+k+'"'+(S.mf.status===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'+
+    '<label class="muted" for="mfm">Model</label><select id="mfm" data-mf="model"><option value="*">wszystkie</option>'+MODELS.map(([k,v])=>'<option value="'+k+'"'+(S.mf.model===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'+
+    '<label class="muted" for="mfu">Braki w uczelni</label><select id="mfu" data-mf="unit"><option value="">—</option>'+U.map(u=>'<option value="'+esc(u.code)+'"'+(S.mf.unit===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'</select></div>';
+  const pass=p=>(!S.mf.status||(p.status||'szkic')===S.mf.status)&&(S.mf.model==='*'||S.mf.model===(p.model||''))&&(!S.mf.unit||!['dziala','nd'].includes(((p.units||{})[S.mf.unit]||{}).state||''));
+  h+='<div class="tablewrap"><table class="mx"><thead><tr><th>Proces L3</th><th style="width:120px">Status</th><th style="width:150px">Model realizacji</th><th style="width:170px">Właściciel (Grupa)</th>'+U.map(u=>'<th>'+esc(u.code)+'<div class="uname">'+esc(u.name)+'</div></th>').join('')+'</tr></thead><tbody>';
+  l2.forEach(f=>{const ps=kids(f.id).filter(pass);if(!ps.length)return;
+    h+='<tr class="grp"><td colspan="'+(4+U.length)+'">'+esc(f.name)+'</td></tr>';
+    ps.forEach(p=>{h+='<tr><td class="pn"><a data-sel="'+esc(p.id)+'">'+esc(p.name)+'</a>'+(openComments(p.id)?' <span class="ccount">'+openComments(p.id)+'</span>':'')+'</td>'+
+      '<td><select data-f="status" data-id="'+esc(p.id)+'" aria-label="Status"'+R+'>'+opts(STATUS,p.status||'szkic')+'</select></td>'+
+      '<td><select data-f="model" data-id="'+esc(p.id)+'" aria-label="Model"'+R+'>'+opts(MODELS,p.model)+'</select></td>'+
+      '<td><input type="text" data-f="owner" data-id="'+esc(p.id)+'" value="'+esc(p.owner)+'" placeholder="—" aria-label="Właściciel"'+R+'></td>'+
+      U.map(u=>{const v=(p.units||{})[u.code]||{};return '<td><div class="ucell"><input type="text" data-u="'+esc(u.code)+'" data-uf="who" data-id="'+esc(p.id)+'" value="'+esc(v.who)+'" placeholder="kto?" aria-label="'+esc(u.code)+' odpowiedzialny"'+R+'><select data-u="'+esc(u.code)+'" data-uf="state" data-id="'+esc(p.id)+'" aria-label="'+esc(u.code)+' stan"'+R+'>'+opts(STATES,v.state)+'</select></div></td>';}).join('')+'</tr>';});});
+  h+='</tbody></table></div></div>';return h;}
+
+/* uzgodnienia */
+function vUzg(){const a=S.nodes.get(S.area);
+  const open=S.comments.filter(c=>!c.resolved&&S.nodes.has(c.node)&&rootOf(c.node)===S.area);
+  const byNode={};open.forEach(c=>(byNode[c.node]=byNode[c.node]||[]).push(c));
+  const disc=[a,...subtree(a.id)].filter(n=>n.status==='dyskusja');
+  let h='<div class="page"><h2>Do uzgodnienia: '+esc(a.name)+'</h2><p class="lead">Otwarte komentarze zespołu i elementy oznaczone statusem „Do dyskusji”. Rozwiązany komentarz znika z tej listy.</p>';
+  h+='<h3 style="font-size:15px;margin:6px 0 8px">Otwarte komentarze ('+open.length+')</h3>';
+  h+=Object.keys(byNode).length?Object.entries(byNode).map(([id,cs])=>{const n=S.nodes.get(id);return '<div class="qgroup"><h3><span class="lv lv'+n.level+'">'+LVC[n.level]+'</span><a data-sel="'+esc(id)+'">'+esc(n.name)+'</a><span class="muted" style="font-weight:400;font-size:12px">'+esc(path(id).slice(1,-1).map(p=>p.name).join(' › '))+'</span></h3>'+
+    cs.map(c=>'<div class="comment"><div class="ch"><b>'+esc(nm(c.by))+'</b><span>'+esc(fmt(c.at))+'</span><span class="spacer"></span>'+(ro()?'':'<button class="btn sm ghost" data-act="resolve" data-cid="'+esc(c.id)+'">Oznacz jako rozwiązane</button>')+'</div><p>'+esc(c.text)+'</p></div>').join('')+'</div>';}).join(''):'<p class="muted">Brak otwartych komentarzy.</p>';
+  h+='<h3 style="font-size:15px;margin:18px 0 8px">Elementy „Do dyskusji” ('+disc.length+')</h3>'+(disc.length?'<div class="qgroup">'+disc.map(n=>'<div class="li" style="padding:3px 0"><span class="lv lv'+n.level+'">'+LVC[n.level]+'</span><a data-sel="'+esc(n.id)+'" style="cursor:pointer">'+esc(n.name)+'</a><span class="muted" style="font-size:12px">'+esc(rel(n.updatedAt))+'</span></div>').join('')+'</div>':'<p class="muted">Żaden element nie ma statusu „Do dyskusji”.</p>');
+  return h+'</div>';}
+
+/* historia */
+function vHist(){const L=S.log.filter(l=>!l.area||l.area===S.area);
+  return '<div class="page"><h2>Historia zmian</h2><p class="lead">Ostatnie zmiany w obszarze, najnowsze na górze (do 300 wpisów).</p><div class="tablewrap" style="padding:4px 14px"><div class="loglist">'+
+  (L.length?L.map(l=>'<div class="logi"><time>'+esc(fmt(l.at))+'</time><span><b>'+esc(nm(l.by))+'</b> · '+esc(l.action)+(l.detail?' ('+esc(l.detail)+')':'')+' · '+(S.nodes.has(l.node)?'<a data-sel="'+esc(l.node)+'" style="cursor:pointer;color:var(--accent)">'+esc(S.nodes.get(l.node).name)+'</a>':esc(l.nodeName||''))+'</span></div>').join(''):'<p class="muted">Brak zapisanych zmian.</p>')+'</div></div></div>';}
+
+/* ---------- modale ---------- */
+function modal(html,wide){$('#modal').innerHTML='<div class="modal" role="dialog" aria-modal="true"><div class="box'+(wide?' wide':'')+'">'+html+'</div></div>';const f=$('#modal').querySelector('input,textarea,button');if(f)f.focus();}
+function closeModal(){$('#modal').innerHTML='';}
+function confirmBox(title,text,okLabel,fn){modal('<h2>'+esc(title)+'</h2><p>'+esc(text)+'</p><div class="acts"><button class="btn" data-act="mclose">Anuluj</button><button class="btn primary" id="mok">'+esc(okLabel)+'</button></div>');$('#mok').onclick=()=>{closeModal();fn();};}
+function settings(){const U=units();
+  modal('<h2>Uczelnie w Grupie</h2><p class="muted" style="margin-top:0">Skróty pojawiają się w kolumnach macierzy i na mapie. Dodanie uczelni tworzy nową kolumnę dla wszystkich procesów.</p><div id="ulist" class="listed">'+U.map((u,i)=>'<div class="li"><input type="text" value="'+esc(u.code)+'" data-ucode="'+i+'" style="max-width:90px" aria-label="Skrót"><input type="text" value="'+esc(u.name)+'" data-uname="'+i+'" aria-label="Pełna nazwa"></div>').join('')+'</div>'+
+  '<button class="btn sm" style="margin-top:8px" id="uadd">+ Uczelnia</button><div class="acts"><button class="btn" data-act="mclose">Anuluj</button><button class="btn primary" id="usave"'+(S.isAdmin?'':' disabled title="Listę uczelni zmienia administrator"')+'>Zapisz</button></div>');
+  $('#uadd').onclick=()=>{const d=document.createElement('div');const i=$('#ulist').children.length;d.className='li';d.innerHTML='<input type="text" data-ucode="'+i+'" style="max-width:90px" placeholder="Skrót" aria-label="Skrót"><input type="text" data-uname="'+i+'" placeholder="Pełna nazwa" aria-label="Pełna nazwa">';$('#ulist').appendChild(d);};
+  $('#usave').onclick=async()=>{const rows=[...document.querySelectorAll('[data-ucode]')].map(e=>({code:e.value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,''),name:(document.querySelector('[data-uname="'+e.dataset.ucode+'"]').value||'').trim()})).filter(r=>r.code);
+    if(new Set(rows.map(r=>r.code)).size!==rows.length){toast('Skróty uczelni muszą być unikalne.');return;}
+    try{chk(await S.db.from('settings').upsert({key:'units',value:rows}));S.config={units:rows};closeModal();render();logIt(S.area,'zmiana','lista uczelni: '+rows.map(r=>r.code).join(', '));}catch(e){failWrite(e);}};}
+function newArea(){modal('<h2>Nowy obszar</h2><div class="field"><label for="an">Nazwa obszaru</label><input type="text" id="an" placeholder="np. Obszar Finanse"></div><div class="acts"><button class="btn" data-act="mclose">Anuluj</button><button class="btn primary" id="aok">Utwórz</button></div>');
+  $('#aok').onclick=async()=>{const v=$('#an').value.trim();if(!v)return;closeModal();const id=await createNode('',1,v);if(id){S.area=id;S.open.add(id);select(id);}};}
+function exportMd(){const a=S.nodes.get(S.area);const U=units();let md='# '+a.name+'\n\n'+(a.desc?a.desc+'\n\n':'');
+  const w=(n,d)=>{const hdr='#'.repeat(Math.min(d+1,6));md+=hdr+' '+LVC[n.level]+' · '+n.name+'\n\n';
+    if(n.desc)md+=n.desc+'\n\n';md+='- Status: '+lbl(STATUS,n.status)+(n.level<=3?'\n- Model realizacji: '+lbl(MODELS,n.model):'')+(n.owner?'\n- Właściciel: '+n.owner:'')+'\n';
+    if(n.level>=2)U.forEach(u=>{const v=(n.units||{})[u.code]||{};if(v.who||v.state||v.note)md+='- '+u.code+': '+(v.who||'—')+' ('+lbl(STATES,v.state)+')'+(v.note?' · '+v.note:'')+'\n';});
+    if((n.decisions||[]).length)md+='\nDecyzje:\n'+n.decisions.map((x,i)=>(i+1)+'. '+x).join('\n')+'\n';md+='\n';
+    kids(n.id).forEach(k=>{if(k.level===4){md+='- '+k.name+(k.owner?' ('+k.owner+')':'')+'\n';}else w(k,d+1);});if(n.level===3)md+='\n';};
+  kids(a.id).forEach(k=>w(k,1));
+  modal('<h2>Eksport do Markdown</h2><p class="muted" style="margin-top:0">Skopiuj treść i wklej do dokumentu lub wiadomości.</p><textarea id="mdout" rows="14" readonly>'+esc(md)+'</textarea><div class="acts"><button class="btn" data-act="mclose">Zamknij</button><button class="btn primary" id="cp">Kopiuj</button></div>');
+  $('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(md);toast('Skopiowano do schowka.');}catch(e){$('#mdout').select();toast('Zaznaczono tekst: skopiuj skrótem Ctrl+C / ⌘C.');}};}
+
+/* ---------- zdarzenia ---------- */
+document.addEventListener('click',async e=>{
+  const v=e.target.closest('[data-view]');if(v){e.preventDefault();S.view=v.dataset.view;setHash(S.view);render(true);return;}
+  const tg=e.target.closest('[data-tog]');if(tg){e.stopPropagation();const id=tg.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);render(true);return;}
+  const b=e.target.closest('[data-act]');
+  if(b&&!b.disabled){const act=b.dataset.act,id=b.dataset.id;
+    if(act==='mclose'){closeModal();return;}
+    if(act==='settings'){settings();return;}
+    if(act==='team'){teamBox();return;}
+    if(act==='profile'){profileBox(false);return;}
+    if(act==='logout'){if(sb)await sb.auth.signOut();history.replaceState(null,'',location.pathname);location.reload();return;}
+    if(act==='memdel'){const em=b.dataset.mem;confirmBox('Usunąć z zespołu?',em+' straci dostęp do narzędzia.','Usuń',async()=>{try{chk(await sb.from('members').delete().eq('email',em));refetch('members');}catch(err){failWrite(err);}});return;}
+    if(act==='export'){exportMd();return;}
+    if(act==='newArea'){newArea();return;}
+    if(act==='expandAll'){[S.area,...subtree(S.area).filter(n=>n.level<3).map(n=>n.id)].forEach(i=>S.open.add(i));render(true);return;}
+    if(act==='collapseAll'){S.open.clear();S.open.add(S.area);render(true);return;}
+    if(act==='addKid'){const p=S.nodes.get(id);const nid=await createNode(id,p.level+1);if(nid){S.open.add(id);if(p.level+1<4)select(nid);else render(true);}return;}
+    if(act==='addDec'){const n=S.nodes.get(id);const d=(n.decisions||[]).slice();d.push('');await saveNode(id,{decisions:d},'dodano decyzję');requestAnimationFrame(()=>{const el=[...document.querySelectorAll('[data-dec][data-id="'+CSS.escape(id)+'"]')].pop();if(el)el.focus();});return;}
+    if(act==='delDec'){const n=S.nodes.get(id);const d=(n.decisions||[]).slice();const i=+b.dataset.i;const t=d[i];d.splice(i,1);await saveNode(id,{decisions:d},'usunięto decyzję'+(t?' „'+t+'”':''));return;}
+    if(act==='up'||act==='down'){await moveOrder(id,act==='up'?-1:1);return;}
+    if(act==='del'){const n=S.nodes.get(id);const k=subtree(id).length;confirmBox('Usunąć element?','„'+n.name+'”'+(k?' oraz '+k+' elementów podrzędnych':'')+' zostanie usunięte dla całego zespołu. Tej operacji nie można cofnąć.','Usuń',()=>deleteNode(id));return;}
+    if(act==='comment'){const t=$('#newc').value.trim();if(!t)return;try{chk(await S.db.from('comments').insert({node:id,area:rootOf(id)||'',body:t}));$('#newc').value='';refetch('comments');logIt(id,'komentarz',t.slice(0,80));}catch(err){failWrite(err);}return;}
+    if(act==='resolve'||act==='reopen'){try{chk(await S.db.from('comments').update({resolved:act==='resolve',resolved_by:S.me,resolved_at:new Date().toISOString()}).eq('id',b.dataset.cid));refetch('comments');}catch(err){failWrite(err);}return;}
+  }
+  const s=e.target.closest('[data-sel]');if(s&&!e.target.closest('input,select,textarea')){e.preventDefault();select(s.dataset.sel,'struktura');}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').innerHTML){closeModal();}
+  if(e.key==='Enter'){const c=e.target.closest('.mcard');if(c){select(c.dataset.sel,'struktura');}
+    if(e.target.matches('input[type=text][data-id]'))e.target.blur();}});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;const pos=e.target.selectionStart;render(true);const q=$('#q');if(q){q.focus();q.setSelectionRange(pos,pos);}}});
+document.addEventListener('change',async e=>{const t=e.target;
+  if(t.id==='area'){S.area=t.value;S.sel=t.value;S.open.add(t.value);kids(t.value).forEach(k=>S.open.add(k.id));setHash(S.view==='struktura'?'w-'+t.value:S.view);render(true);return;}
+  if(t.dataset.mf){S.mf[t.dataset.mf]=t.value;render(true);return;}
+  if(t.dataset.mem){const patch={[t.dataset.mf2]:t.dataset.mf2==='name'?t.value.trim():t.value};try{chk(await sb.from('members').update(patch).eq('email',t.dataset.mem));refetch('members');}catch(err){failWrite(err);}return;}
+  if(t.dataset.actChange==='move'&&t.value){const n=S.nodes.get(t.dataset.id);const np=S.nodes.get(t.value);const ord=kids(np.id).reduce((m,s)=>Math.max(m,s.order||0),0)+1;
+    await saveNode(n.id,{parent:np.id,order:ord},'przeniesiono pod „'+np.name+'”');S.open.add(np.id);select(n.id);return;}
+  const id=t.dataset.id;if(!id||!S.nodes.has(id))return;const n=S.nodes.get(id);
+  if(t.dataset.f){const f=t.dataset.f;let val=t.value;if(f==='name'){val=val.trim();if(!val){t.value=n.name;return;}}
+    if((n[f]||'')===val)return;const names={name:'nazwa',status:'status → '+lbl(STATUS,val),model:'model → '+lbl(MODELS,val),owner:'właściciel → '+(val||'—'),desc:'opis',note:'opis rozszerzony'};
+    await saveNode(id,{[f]:val},names[f]||f);return;}
+  if(t.dataset.u){const u=t.dataset.u,uf=t.dataset.uf;const cur=((n.units||{})[u]||{})[uf]||'';if(cur===t.value)return;
+    await saveUnit(id,u,uf,t.value,u+': '+({who:'odpowiedzialny → '+(t.value||'—'),state:'stan → '+lbl(STATES,t.value),note:'uwagi'}[uf]));return;}
+  if(t.dataset.dec!==undefined){const d=(n.decisions||[]).slice();const i=+t.dataset.dec;if(d[i]===t.value)return;d[i]=t.value;await saveNode(id,{decisions:d},'decyzja '+(i+1));return;}
+});
+
+boot();
+</script>
+</body>
+</html>
