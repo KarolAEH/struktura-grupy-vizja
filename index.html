@@ -349,6 +349,8 @@ function afterNodes(){
   if(!S.openInit&&S.area){S.open.add(S.area);kids(S.area).forEach(k=>S.open.add(k.id));S.openInit=true;}}
 const refT={};
 function refetch(t){clearTimeout(refT[t]);refT[t]=setTimeout(async()=>{try{
+  if(t==='nodes'){const rows=chk(await sb.from('nodes').select('*').limit(5000));S.nodes=new Map(rows.map(r=>[r.id,fromRow(r)]));afterNodes();}
+  if(t==='log'){S.log=chk(await sb.from('change_log').select('*').order('at',{ascending:false}).limit(300)).map(lFrom);}
   if(t==='comments'){S.comments=chk(await sb.from('comments').select('*').order('created_at',{ascending:true}).limit(5000)).map(cFrom);}
   if(t==='settings'){applySettings(chk(await sb.from('settings').select('*')));}
   if(t==='members'){applyMembers(chk(await sb.from('members').select('*').order('email')));const me=S.members[S.me];
@@ -358,15 +360,20 @@ function subscribe(){
   sb.channel('zmiany')
     .on('postgres_changes',{event:'*',schema:'public',table:'nodes'},p=>{if(p.eventType==='DELETE'){if(p.old&&p.old.id)S.nodes.delete(p.old.id);}else if(p.new&&p.new.id)applyNode(p.new);afterNodes();render();})
     .on('postgres_changes',{event:'*',schema:'public',table:'comments'},()=>refetch('comments'))
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'change_log'},p=>{if(p.new&&!S.log.some(l=>l.id===p.new.id)){S.log.unshift(lFrom(p.new));S.log.length=Math.min(S.log.length,300);render();}})
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'change_log'},p=>{if(p.new&&!S.log.some(l=>l.id===p.new.id)){S.log.unshift(lFrom(p.new));S.log.length=Math.min(S.log.length,300);render();}
+      // każda zmiana innej osoby zostawia wpis w historii: pobierz świeże dane, nawet jeśli bezpośredni sygnał z tabeli nie dotarł
+      if(p.new&&p.new.by_email!==S.me)refreshAll();})
     .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>refetch('settings'))
     .on('postgres_changes',{event:'*',schema:'public',table:'members'},()=>refetch('members'))
     .subscribe(st=>{const c=$('#conn');if(c){c.classList.toggle('on',st==='SUBSCRIBED');c.title=st==='SUBSCRIBED'?'Połączono: zmiany zespołu widać na żywo':'Brak połączenia na żywo – odśwież stronę';}});
   const pres=sb.channel('obecni',{config:{presence:{key:S.me}}});
   pres.on('presence',{event:'sync'},()=>{S.online=Object.keys(pres.presenceState());renderWho();})
     .subscribe(async st=>{if(st==='SUBSCRIBED'){try{await pres.track({at:Date.now()});}catch(e){}}});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadAll();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshAll(true);});
+  // zabezpieczenie: odświeżenie co 30 s, gdy karta jest widoczna
+  setInterval(()=>{if(document.visibilityState==='visible')refreshAll(true);},30000);
 }
+function refreshAll(withLog){['nodes','comments','members','settings'].concat(withLog?['log']:[]).forEach(refetch);}
 const ROLES=[['viewer','Podgląd i komentarze'],['editor','Edycja'],['admin','Administrator']];
 function renderWho(){const me=$('#me');if(!me||!S.me)return;
   const others=(S.online||[]).filter(e=>e!==S.me);
@@ -389,7 +396,7 @@ async function loginLink(email,fresh,name){
   $('#cplink').onclick=()=>cp(out.link,$('#llink'));$('#cpmsg').onclick=()=>cp(msg,$('#lmsgt'));}
 function profileBox(first){const m=S.members[S.me]||{};
   modal('<h2>'+(first?'Witaj w narzędziu':'Twój profil')+'</h2><p class="muted" style="margin-top:0">Imię i nazwisko pokazujemy przy komentarzach i w historii zmian.</p><div class="grid2"><div class="field"><label for="pn">Imię i nazwisko</label><input type="text" id="pn" value="'+esc(m.name||'')+'"></div><div class="field"><label for="pu">Uczelnia</label><select id="pu"><option value="">—</option>'+units().map(u=>'<option value="'+esc(u.code)+'"'+(m.unit===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'<option value="GRUPA"'+(m.unit==='GRUPA'?' selected':'')+'>Grupa VIZJA</option></select></div></div><div class="acts"><button class="btn" data-act="mclose">'+(first?'Później':'Anuluj')+'</button><button class="btn primary" id="psave">Zapisz</button></div>');
-  $('#psave').onclick=async()=>{try{chk(await sb.from('members').update({name:$('#pn').value.trim(),unit:$('#pu').value}).eq('email',S.me));closeModal();refetch('members');}catch(e){failWrite(e);}};}
+  $('#psave').onclick=async()=>{try{chk(await sb.from('members').update({name:$('#pn').value.trim(),unit:$('#pu').value}).eq('email',S.me));closeModal();refetch('members');logIt('','zespół','profil: '+$('#pn').value.trim(),{name:'Zespół',area:''});}catch(e){failWrite(e);}};}
 function teamBox(){const list=Object.values(S.members).sort((a,b)=>(a.unit||'').localeCompare(b.unit||'')||(a.name||a.email).localeCompare(b.name||b.email,'pl'));const A=S.isAdmin;
   const uopts=v=>'<option value="">—</option>'+units().map(u=>'<option value="'+esc(u.code)+'"'+(v===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'<option value="GRUPA"'+(v==='GRUPA'?' selected':'')+'>Grupa</option>';
   modal('<h2>Zespół ('+list.length+')</h2><p class="muted" style="margin-top:0">'+(A?'Dodaj osoby, które mają pracować nad strukturą. Przycisk „Link logowania” tworzy jednorazowy link, który wysyłasz tej osobie sam (e-mail, Teams).':'Osoby z dostępem do narzędzia. Listą zarządza administrator.')+'</p>'+
@@ -398,7 +405,7 @@ function teamBox(){const list=Object.values(S.members).sort((a,b)=>(a.unit||'').
    (A?'<h3 style="font-size:14px;margin:14px 0 6px">Dodaj osobę</h3><form id="memadd" class="grid2" style="align-items:end"><div class="field"><label for="ne">E-mail</label><input type="email" id="ne" required placeholder="imie.nazwisko@uczelnia.pl"></div><div class="field"><label for="nn">Imię i nazwisko</label><input type="text" id="nn"></div><div class="field"><label for="nu">Uczelnia</label><select id="nu">'+uopts('')+'</select></div><div class="field"><label for="nr">Rola</label><select id="nr">'+opts(ROLES,'editor')+'</select></div><div class="field"><button class="btn primary" type="submit">Dodaj do zespołu</button></div></form>':'')+
    '<div class="acts"><button class="btn" data-act="mclose">Zamknij</button></div>',true);
   if(A){$('#memadd').onsubmit=async e=>{e.preventDefault();const em=$('#ne').value.trim().toLowerCase();if(!em)return;
-      try{chk(await sb.from('members').upsert({email:em,name:$('#nn').value.trim(),unit:$('#nu').value,role:$('#nr').value}));refetch('members');loginLink(em,true,$('#nn').value.trim());}catch(err){failWrite(err);}};}}
+      try{chk(await sb.from('members').upsert({email:em,name:$('#nn').value.trim(),unit:$('#nu').value,role:$('#nr').value}));logIt('','zespół','dodano '+em,{name:'Zespół',area:''});refetch('members');loginLink(em,true,$('#nn').value.trim());}catch(err){failWrite(err);}};}}
 
 /* ---------- routing ---------- */
 function readHash(){const h=(location.hash||'').slice(1);
@@ -580,7 +587,7 @@ document.addEventListener('click',async e=>{
     if(act==='profile'){profileBox(false);return;}
     if(act==='logout'){if(sb)await sb.auth.signOut();history.replaceState(null,'',location.pathname);location.reload();return;}
     if(act==='mlink'){loginLink(b.dataset.mem,false);return;}
-    if(act==='memdel'){const em=b.dataset.mem;confirmBox('Usunąć z zespołu?',em+' straci dostęp do narzędzia.','Usuń',async()=>{try{chk(await sb.from('members').delete().eq('email',em));refetch('members');}catch(err){failWrite(err);}});return;}
+    if(act==='memdel'){const em=b.dataset.mem;confirmBox('Usunąć z zespołu?',em+' straci dostęp do narzędzia.','Usuń',async()=>{try{chk(await sb.from('members').delete().eq('email',em));refetch('members');logIt('','zespół','usunięto '+em,{name:'Zespół',area:''});}catch(err){failWrite(err);}});return;}
     if(act==='export'){exportMd();return;}
     if(act==='newArea'){newArea();return;}
     if(act==='expandAll'){[S.area,...subtree(S.area).filter(n=>n.level<3).map(n=>n.id)].forEach(i=>S.open.add(i));render(true);return;}
@@ -591,7 +598,7 @@ document.addEventListener('click',async e=>{
     if(act==='up'||act==='down'){await moveOrder(id,act==='up'?-1:1);return;}
     if(act==='del'){const n=S.nodes.get(id);const k=subtree(id).length;confirmBox('Usunąć element?','„'+n.name+'”'+(k?' oraz '+k+' elementów podrzędnych':'')+' zostanie usunięte dla całego zespołu. Tej operacji nie można cofnąć.','Usuń',()=>deleteNode(id));return;}
     if(act==='comment'){const t=$('#newc').value.trim();if(!t)return;try{chk(await S.db.from('comments').insert({node:id,area:rootOf(id)||'',body:t}));$('#newc').value='';refetch('comments');logIt(id,'komentarz',t.slice(0,80));}catch(err){failWrite(err);}return;}
-    if(act==='resolve'||act==='reopen'){try{chk(await S.db.from('comments').update({resolved:act==='resolve',resolved_by:S.me,resolved_at:new Date().toISOString()}).eq('id',b.dataset.cid));refetch('comments');}catch(err){failWrite(err);}return;}
+    if(act==='resolve'||act==='reopen'){try{chk(await S.db.from('comments').update({resolved:act==='resolve',resolved_by:S.me,resolved_at:new Date().toISOString()}).eq('id',b.dataset.cid));refetch('comments');const cm=S.comments.find(c=>c.id===b.dataset.cid);if(cm)logIt(cm.node,'komentarz',(act==='resolve'?'rozwiązany: ':'otwarty ponownie: ')+String(cm.text||'').slice(0,60));}catch(err){failWrite(err);}return;}
   }
   const s=e.target.closest('[data-sel]');if(s&&!e.target.closest('input,select,textarea')){e.preventDefault();select(s.dataset.sel,'struktura');}
 });
@@ -602,7 +609,7 @@ document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;c
 document.addEventListener('change',async e=>{const t=e.target;
   if(t.id==='area'){S.area=t.value;S.sel=t.value;S.open.add(t.value);kids(t.value).forEach(k=>S.open.add(k.id));setHash(S.view==='struktura'?'w-'+t.value:S.view);render(true);return;}
   if(t.dataset.mf){S.mf[t.dataset.mf]=t.value;render(true);return;}
-  if(t.dataset.mem){const patch={[t.dataset.mf2]:t.dataset.mf2==='name'?t.value.trim():t.value};try{chk(await sb.from('members').update(patch).eq('email',t.dataset.mem));refetch('members');}catch(err){failWrite(err);}return;}
+  if(t.dataset.mem){const patch={[t.dataset.mf2]:t.dataset.mf2==='name'?t.value.trim():t.value};try{chk(await sb.from('members').update(patch).eq('email',t.dataset.mem));refetch('members');logIt('','zespół',t.dataset.mem+': '+({name:'imię i nazwisko',unit:'uczelnia',role:'rola'}[t.dataset.mf2]||t.dataset.mf2)+' → '+(t.dataset.mf2==='role'?lbl(ROLES,t.value):t.value||'—'),{name:'Zespół',area:''});}catch(err){failWrite(err);}return;}
   if(t.dataset.actChange==='move'&&t.value){const n=S.nodes.get(t.dataset.id);const np=S.nodes.get(t.value);const ord=kids(np.id).reduce((m,s)=>Math.max(m,s.order||0),0)+1;
     await saveNode(n.id,{parent:np.id,order:ord},'przeniesiono pod „'+np.name+'”');S.open.add(np.id);select(n.id);return;}
   const id=t.dataset.id;if(!id||!S.nodes.has(id))return;const n=S.nodes.get(id);
