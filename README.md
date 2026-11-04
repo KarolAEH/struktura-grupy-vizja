@@ -49,12 +49,13 @@ Całość zajmuje ok. 20–30 minut. Nie trzeba niczego instalować na komputerz
    - **Podgląd i komentarze** – przegląda i komentuje,
    - **Edycja** – zmienia strukturę,
    - **Administrator** – dodatkowo zarządza zespołem i listą uczelni.
-2. Od razu pojawi się **jednorazowy link logowania** i gotowa wiadomość. Skopiuj ją i wyślij tej osobie sam (e-mail, Teams). Link możesz też wygenerować później przyciskiem **Link logowania** przy danej osobie.
-3. Po kliknięciu linku osoba pozostaje zalogowana w tej przeglądarce. Nowy link jest potrzebny tylko po wylogowaniu, na innym urządzeniu albo gdy poprzedni wygasł.
+2. Od razu pojawi się **link logowania** i gotowa wiadomość. Skopiuj ją i wyślij tej osobie sam (e-mail, Teams). Link możesz też wygenerować później przyciskiem **Link logowania** przy danej osobie.
+3. Link jest ważny **7 dni**. Prowadzi na stronę narzędzia, a logowanie następuje dopiero po kliknięciu **Zaloguj się**, więc skanery poczty i podglądy linków w Teams go nie zużyją. Kolejny wygenerowany link nie unieważnia poprzedniego. Po użyciu link działa jeszcze 15 minut (na wypadek ponownego kliknięcia), potem wygasa.
+4. Po zalogowaniu osoba pozostaje zalogowana w tej przeglądarce. Nowy link jest potrzebny tylko po wylogowaniu albo na innym urządzeniu.
 
-Linki generuje funkcja `api/login-link.js` z kluczem `SUPABASE_SERVICE_ROLE_KEY` (ustawia go integracja Supabase w Vercelu; klucz nie trafia do przeglądarki). Funkcja sprawdza, że prosi administrator i że adres jest na liście zespołu.
+Zaproszenia obsługują funkcje `api/login-link.js` (tworzy zaproszenie, tylko administrator) i `api/redeem.js` (po kliknięciu „Zaloguj się” tworzy jednorazowy kod Supabase i od razu go używa). Korzystają z klucza `SUPABASE_SERVICE_ROLE_KEY` (ustawia go integracja Supabase w Vercelu; klucz nie trafia do przeglądarki). Zaproszenia są w tabeli `invites`, do której przeglądarki nie mają dostępu; w bazie zapisany jest tylko skrót tokenu.
 
-Czas ważności linku ustawisz w Supabase: **Authentication → Configuration → Sign In / Providers → Email → Email OTP Expiration** (maks. 86400 s = 24 h).
+> Baza zainstalowana przed 4.11.2026: uruchom raz w SQL Editor plik [`supabase/2026-11-04-zaproszenia.sql`](supabase/2026-11-04-zaproszenia.sql).
 
 ### 7. (Opcjonalnie) Wysyłka linków e-mailem z Supabase
 
@@ -70,8 +71,10 @@ Każda zmiana w repozytorium (np. wprowadzona z pomocą Claude) wdraża się na 
 |---|---|
 | `index.html` | cała aplikacja (widoki: Struktura, Mapa funkcji, Macierz odpowiedzialności, Do uzgodnienia, Historia zmian) |
 | `api/config.js` | przekazuje stronie adres i publiczny klucz Supabase ze zmiennych Vercela |
-| `api/login-link.js` | tworzy jednorazowe linki logowania (tylko dla administratora) |
+| `api/login-link.js` | tworzy zaproszenia ważne 7 dni (tylko dla administratora) |
+| `api/redeem.js` | realizuje zaproszenie po kliknięciu „Zaloguj się” |
+| `api/_lib.js` | wspólne funkcje serwerowe |
 | `supabase/setup.sql` | tabele, uprawnienia (RLS), zmiany na żywo, dane startowe |
 | `vercel.json` | nagłówki bezpieczeństwa |
 
-Tabele: `nodes` (elementy L1–L4), `comments`, `change_log`, `settings` (lista uczelni), `members` (zespół i role). Klucz „anon” jest publiczny z założenia: dostęp do danych pilnują reguły Row Level Security, które wpuszczają wyłącznie osoby z tabeli `members`.
+Tabele: `nodes` (elementy L1–L4), `comments`, `change_log`, `settings` (lista uczelni), `members` (zespół i role), `invites` (zaproszenia, tylko dla serwera). Klucz „anon” jest publiczny z założenia: dostęp do danych pilnują reguły Row Level Security, które wpuszczają wyłącznie osoby z tabeli `members`.

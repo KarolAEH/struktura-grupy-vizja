@@ -169,5 +169,10 @@ on conflict (id) do nothing$stmt$;
   execute $stmt$insert into public.change_log (node, node_name, area, action, detail, by_email)
 select 'it', 'Obszar IT', 'it', 'import', 'struktura IT ze specyfikacji Struktura_IT_L2_L3_L4.docx (6 funkcji L2, 37 procesów L3, 111 działań L4)', ''
 where not exists (select 1 from public.change_log where node = 'it' and action = 'import')$stmt$;
+  execute $stmt$create table if not exists public.invites (token_hash text primary key, email text not null, created_by text not null default '', created_at timestamptz not null default now(), expires_at timestamptz not null, used_at timestamptz)$stmt$;
+  execute $stmt$alter table public.invites enable row level security$stmt$;
+  execute $stmt$revoke all on public.invites from anon, authenticated$stmt$;
+  execute $stmt$grant all on public.invites to service_role$stmt$;
+  execute $stmt$create index if not exists invites_email_idx on public.invites(email)$stmt$;
 end
 $setup$;

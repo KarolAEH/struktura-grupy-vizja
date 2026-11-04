@@ -287,13 +287,26 @@ async function boot(){
     if(sess&&!S.started){S.session=sess;start();}
     if(ev==='SIGNED_OUT'){history.replaceState(null,'',location.pathname);location.reload();}});
   const {data}=await sb.auth.getSession();
-  const qp=new URLSearchParams(location.search);const lt=qp.get('logowanie');
+  const qp=new URLSearchParams(location.search);const lt=qp.get('logowanie');const zt=qp.get('zaproszenie');
+  if(zt){
+    if(data&&data.session){history.replaceState(null,'',location.pathname);S.session=data.session;start();return;}
+    showInviteLogin(zt);return;}
   if(lt){
     if(data&&data.session){history.replaceState(null,'',location.pathname);S.session=data.session;start();return;}
     showTokenLogin(lt,qp.get('typ')||'magiclink');return;}
   if(data&&data.session){S.session=data.session;start();}
   else if(!S.started){const err=new URLSearchParams((location.hash||'').slice(1)).get('error_description');showLogin(err);}
 }
+function showInviteLogin(invite){
+  shell('<h2>Logowanie do narzędzia</h2><p class="muted">Struktura organizacyjna Grupy VIZJA. Kliknij przycisk, żeby się zalogować.</p><button class="btn primary" id="tbtn" style="width:100%;padding:9px">Zaloguj się</button><div id="lmsg" role="status"></div>');
+  $('#tbtn').onclick=async()=>{const b=$('#tbtn');b.disabled=true;const msg=$('#lmsg');msg.className='';msg.textContent='Logowanie…';
+    try{const r=await fetch('/api/redeem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:invite})});
+      const j=await r.json().catch(()=>({error:'Nieprawidłowa odpowiedź serwera ('+r.status+').'}));
+      if(!r.ok||!j.token_hash)throw new Error(j.error||('Błąd '+r.status));
+      const v=chk(await sb.auth.verifyOtp({token_hash:j.token_hash,type:j.type||'magiclink'}));
+      history.replaceState(null,'',location.pathname);
+      if(v&&v.session){S.session=v.session;start();}else{const {data}=await sb.auth.getSession();if(data&&data.session){S.session=data.session;start();}else throw new Error('Nie udało się zalogować. Spróbuj ponownie.');}
+    }catch(e){msg.className='gerr';msg.textContent=(e&&e.message)||'Nie udało się zalogować.';b.disabled=false;}};}
 function showTokenLogin(tokenHash,typ){
   shell('<h2>Logowanie do narzędzia</h2><p class="muted">Struktura organizacyjna Grupy VIZJA. Kliknij przycisk, żeby się zalogować. Link działa jeden raz.</p><button class="btn primary" id="tbtn" style="width:100%;padding:9px">Zaloguj się</button><div id="lmsg" role="status"></div>');
   $('#tbtn').onclick=async()=>{const b=$('#tbtn');b.disabled=true;$('#lmsg').className='';$('#lmsg').textContent='Logowanie…';
@@ -380,15 +393,15 @@ function renderWho(){const me=$('#me');if(!me||!S.me)return;
   me.innerHTML='<b>'+esc(nm(S.me))+'</b> · '+esc(lbl(ROLES,S.role))+(others.length?' · <span title="'+esc(others.map(nm).join(', '))+'">teraz online: '+esc(others.map(nm).slice(0,3).join(', '))+(others.length>3?' +'+(others.length-3):'')+'</span>':'');}
 async function loginLink(email,fresh,name){
   const m=S.members[email]||{name:name||''};if(!m.name&&name)m.name=name;const who=m.name||email;
-  modal('<h2>Link logowania</h2><p class="muted" style="margin-top:0">'+(fresh?'Dodano <b>'+esc(who)+'</b> do zespołu. ':'')+'Tworzę jednorazowy link dla <b>'+esc(email)+'</b>…</p>',true);
+  modal('<h2>Link logowania</h2><p class="muted" style="margin-top:0">'+(fresh?'Dodano <b>'+esc(who)+'</b> do zespołu. ':'')+'Tworzę link logowania dla <b>'+esc(email)+'</b>…</p>',true);
   let out;try{const {data}=await sb.auth.getSession();const tok=data&&data.session&&data.session.access_token;
     const r=await fetch('/api/login-link',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({email})});
     out=await r.json().catch(()=>({error:'Nieprawidłowa odpowiedź serwera ('+r.status+').'}));if(!r.ok&&!out.error)out.error='Błąd '+r.status;}
   catch(e){out={error:'Brak połączenia z serwerem.'};}
   if(!out||out.error||!out.link){modal('<h2>Nie udało się utworzyć linku</h2><p class="gerr">'+esc((out&&out.error)||'Nieznany błąd.')+'</p><div class="acts"><button class="btn" data-act="team">Wróć do zespołu</button></div>');return;}
   const first=(m.name||'').split(' ')[0];
-  const msg=(first?'Cześć '+first+',':'Dzień dobry,')+'\n\nzapraszam do wspólnej pracy nad strukturą organizacyjną Grupy VIZJA. Kliknij poniższy link, żeby zalogować się do narzędzia:\n\n'+out.link+'\n\nLink jest jednorazowy i ważny przez ograniczony czas. Po zalogowaniu wchodzisz na '+location.origin+' i pozostajesz zalogowany/a w tej przeglądarce.\n\n'+(S.members[S.me]&&S.members[S.me].name||'');
-  modal('<h2>Link logowania dla '+esc(who)+'</h2><p class="muted" style="margin-top:0">Wyślij tej osobie link albo gotową wiadomość (e-mail, Teams). Link działa <b>jeden raz</b> i po pewnym czasie wygasa; w razie potrzeby wygeneruj nowy. Link prowadzi na stronę narzędzia; logowanie następuje dopiero po kliknięciu przycisku „Zaloguj się”, więc skanery poczty i podgląd w Teams go nie zużyją.</p>'+
+  const msg=(first?'Cześć '+first+',':'Dzień dobry,')+'\n\nzapraszam do wspólnej pracy nad strukturą organizacyjną Grupy VIZJA. Kliknij poniższy link, żeby zalogować się do narzędzia:\n\n'+out.link+'\n\nPo otwarciu kliknij „Zaloguj się”. Link jest ważny '+(out.days||7)+' dni. Po zalogowaniu wchodzisz na '+location.origin+' i pozostajesz zalogowany/a w tej przeglądarce.\n\n'+(S.members[S.me]&&S.members[S.me].name||'');
+  modal('<h2>Link logowania dla '+esc(who)+'</h2><p class="muted" style="margin-top:0">Wyślij tej osobie link albo gotową wiadomość (e-mail, Teams). Link jest ważny <b>'+(out.days||7)+' dni</b> (do '+esc(new Date(out.expires_at||Date.now()+6048e5).toLocaleDateString('pl-PL'))+'). Logowanie następuje dopiero po kliknięciu „Zaloguj się”, więc skanery poczty i podgląd w Teams go nie zużyją. Kolejny wygenerowany link nie unieważnia poprzedniego.</p>'+
     '<div class="field"><label for="llink">Link</label><input type="text" id="llink" readonly value="'+esc(out.link)+'" style="width:100%;font-size:12px"></div>'+
     '<div class="field" style="margin-top:10px"><label for="lmsgt">Gotowa wiadomość</label><textarea id="lmsgt" rows="9" readonly>'+esc(msg)+'</textarea></div>'+
     '<div class="acts"><button class="btn" data-act="team">Wróć do zespołu</button><button class="btn" id="cplink">Kopiuj link</button><button class="btn primary" id="cpmsg">Kopiuj wiadomość</button></div>',true);
@@ -399,9 +412,9 @@ function profileBox(first){const m=S.members[S.me]||{};
   $('#psave').onclick=async()=>{try{chk(await sb.from('members').update({name:$('#pn').value.trim(),unit:$('#pu').value}).eq('email',S.me));closeModal();refetch('members');logIt('','zespół','profil: '+$('#pn').value.trim(),{name:'Zespół',area:''});}catch(e){failWrite(e);}};}
 function teamBox(){const list=Object.values(S.members).sort((a,b)=>(a.unit||'').localeCompare(b.unit||'')||(a.name||a.email).localeCompare(b.name||b.email,'pl'));const A=S.isAdmin;
   const uopts=v=>'<option value="">—</option>'+units().map(u=>'<option value="'+esc(u.code)+'"'+(v===u.code?' selected':'')+'>'+esc(u.code)+'</option>').join('')+'<option value="GRUPA"'+(v==='GRUPA'?' selected':'')+'>Grupa</option>';
-  modal('<h2>Zespół ('+list.length+')</h2><p class="muted" style="margin-top:0">'+(A?'Dodaj osoby, które mają pracować nad strukturą. Przycisk „Link logowania” tworzy jednorazowy link, który wysyłasz tej osobie sam (e-mail, Teams).':'Osoby z dostępem do narzędzia. Listą zarządza administrator.')+'</p>'+
+  modal('<h2>Zespół ('+list.length+')</h2><p class="muted" style="margin-top:0">'+(A?'Dodaj osoby, które mają pracować nad strukturą. Przycisk „Link logowania” tworzy link ważny 7 dni, który wysyłasz tej osobie sam (e-mail, Teams).':'Osoby z dostępem do narzędzia. Listą zarządza administrator.')+'</p>'+
    '<div style="overflow-x:auto"><table class="units" id="teamlist"><thead><tr><th>E-mail</th><th>Imię i nazwisko</th><th>Uczelnia</th><th>Rola</th>'+(A?'<th></th>':'')+'</tr></thead><tbody>'+
-   list.map(m=>'<tr><td style="font-size:12px">'+esc(m.email)+'</td>'+(A?'<td><input type="text" data-mem="'+esc(m.email)+'" data-mf2="name" value="'+esc(m.name)+'" aria-label="Imię i nazwisko"></td><td><select data-mem="'+esc(m.email)+'" data-mf2="unit" aria-label="Uczelnia">'+uopts(m.unit)+'</select></td><td><select data-mem="'+esc(m.email)+'" data-mf2="role" aria-label="Rola"'+(m.email===S.me?' disabled title="Nie możesz zmienić własnej roli"':'')+'>'+opts(ROLES,m.role)+'</select></td><td style="white-space:nowrap"><button class="btn sm" data-act="mlink" data-mem="'+esc(m.email)+'" title="Wygeneruj jednorazowy link logowania do wysłania tej osobie">Link logowania</button> '+(m.email===S.me?'':'<button class="btn sm ghost danger" data-act="memdel" data-mem="'+esc(m.email)+'" aria-label="Usuń">✕</button>')+'</td>':'<td>'+esc(m.name)+'</td><td>'+esc(m.unit)+'</td><td>'+esc(lbl(ROLES,m.role))+'</td>')+'</tr>').join('')+'</tbody></table></div>'+
+   list.map(m=>'<tr><td style="font-size:12px">'+esc(m.email)+'</td>'+(A?'<td><input type="text" data-mem="'+esc(m.email)+'" data-mf2="name" value="'+esc(m.name)+'" aria-label="Imię i nazwisko"></td><td><select data-mem="'+esc(m.email)+'" data-mf2="unit" aria-label="Uczelnia">'+uopts(m.unit)+'</select></td><td><select data-mem="'+esc(m.email)+'" data-mf2="role" aria-label="Rola"'+(m.email===S.me?' disabled title="Nie możesz zmienić własnej roli"':'')+'>'+opts(ROLES,m.role)+'</select></td><td style="white-space:nowrap"><button class="btn sm" data-act="mlink" data-mem="'+esc(m.email)+'" title="Wygeneruj link logowania (ważny 7 dni) do wysłania tej osobie">Link logowania</button> '+(m.email===S.me?'':'<button class="btn sm ghost danger" data-act="memdel" data-mem="'+esc(m.email)+'" aria-label="Usuń">✕</button>')+'</td>':'<td>'+esc(m.name)+'</td><td>'+esc(m.unit)+'</td><td>'+esc(lbl(ROLES,m.role))+'</td>')+'</tr>').join('')+'</tbody></table></div>'+
    (A?'<h3 style="font-size:14px;margin:14px 0 6px">Dodaj osobę</h3><form id="memadd" class="grid2" style="align-items:end"><div class="field"><label for="ne">E-mail</label><input type="email" id="ne" required placeholder="imie.nazwisko@uczelnia.pl"></div><div class="field"><label for="nn">Imię i nazwisko</label><input type="text" id="nn"></div><div class="field"><label for="nu">Uczelnia</label><select id="nu">'+uopts('')+'</select></div><div class="field"><label for="nr">Rola</label><select id="nr">'+opts(ROLES,'editor')+'</select></div><div class="field"><button class="btn primary" type="submit">Dodaj do zespołu</button></div></form>':'')+
    '<div class="acts"><button class="btn" data-act="mclose">Zamknij</button></div>',true);
   if(A){$('#memadd').onsubmit=async e=>{e.preventDefault();const em=$('#ne').value.trim().toLowerCase();if(!em)return;
