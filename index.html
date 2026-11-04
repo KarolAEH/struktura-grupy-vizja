@@ -186,6 +186,67 @@ input[type=email]{background:var(--surface);border:1px solid var(--line);border-
   main{overflow:auto}
   .detail{padding:14px 16px 40px}
 }
+/* raport dla zarządu – zawsze jasny „papier”, gotowy do druku A4 */
+.reppage{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start}
+.repctl{position:sticky;top:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.repctl h2{font-size:17px}.repctl p{margin:0;font-size:13px}
+.repctl fieldset{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0;display:flex;flex-direction:column;gap:4px}
+.repctl legend{font-size:12px;color:var(--muted);padding:0 4px}
+.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.repctl input[type=date]{width:100%}
+.repwrap{overflow-x:auto}
+.report{--rink:#1b2130;--rmut:#5d6577;--rline:#d9dce3;--racc:#1f4fd1;background:#fff;color:var(--rink);width:794px;max-width:100%;margin:0 auto;padding:44px 48px;box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.06);border-radius:4px;font-size:12.5px;line-height:1.45;color-scheme:light}
+.report h1{font:700 24px/1.2 var(--display);margin:4px 0 6px}
+.report h2{font:600 16px/1.3 var(--display);margin:0 0 10px;padding-bottom:5px;border-bottom:2px solid var(--racc);color:var(--rink)}
+.report h3{font:600 13px var(--display);margin:14px 0 6px;color:var(--rink)}
+.report h4{font:600 12.5px var(--body);margin:0 0 3px;display:flex;gap:8px;align-items:center}
+.rhead{border-bottom:1px solid var(--rline);padding-bottom:12px;margin-bottom:18px}
+.rkick{font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--racc)}
+.rmeta,.rsub{color:var(--rmut);font-size:11px}
+.rsec{margin-bottom:22px;break-inside:auto}
+.rkpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px}
+.rkpis div{border:1px solid var(--rline);border-radius:6px;padding:8px}
+.rkpis b{display:block;font:700 20px var(--display);font-variant-numeric:tabular-nums}
+.rkpis span{font-size:10.5px;color:var(--rmut)}
+.rgrid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rbar{display:flex;height:12px;border-radius:3px;overflow:hidden;background:#eceef2;flex:1}
+.rbar i{display:block;height:100%}
+.rleg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;color:var(--rmut);margin-top:5px}
+.rleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.rcov{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.rcode{font:600 11px var(--display);width:44px}
+.report .st-szkic{background:#9aa1ad}.report .st-dyskusja{background:#d89a1c}.report .st-uzgodnione{background:#1f4fd1}.report .st-zatwierdzone{background:#1d7f3f}
+.m-grupa{background:#1f4fd1}.m-hybryda{background:#6f8fe6}.m-lokalnie{background:#b9c7f2}.m-none{background:#d9dce3}
+.s-dziala{background:#1d7f3f}.s-czesciowo{background:#d89a1c}.s-brak{background:#b3261e}.s-nd{background:#b8bdc7}.s-none{background:#e6e8ec}
+.rlist{margin:0;padding-left:18px}.rlist li{margin-bottom:4px}
+.rnote{white-space:pre-wrap;border-left:3px solid var(--racc);background:#f3f6fd;padding:8px 12px;border-radius:0 6px 6px 0}
+.rinline{margin:0;color:var(--rink)}
+.rtab{width:100%;border-collapse:collapse;font-size:11.5px}
+.rtab th{text-align:left;font-weight:600;color:var(--rmut);font-size:10.5px;border-bottom:1.5px solid var(--rink);padding:4px 6px}
+.rtab td{border-bottom:1px solid var(--rline);padding:5px 6px;vertical-align:top}
+.rtab td.num{text-align:right;font-variant-numeric:tabular-nums}
+.rtab tr{break-inside:avoid}
+.rmx{font-size:10px}.rmx td{padding:4px 5px}
+.rgrp td{background:#eef2fb;font:600 11px var(--display);color:var(--racc)}
+.rchip{display:inline-block;font-size:9.5px;font-weight:600;padding:0 5px;border-radius:7px;white-space:nowrap}
+.report .c-szkic{background:#eceef2;color:#5d6577}.report .c-dyskusja{background:#fbf0d9;color:#8a5600}.report .c-uzgodnione{background:#e6ecfb;color:#1f4fd1}.report .c-zatwierdzone{background:#e3f3e8;color:#1d7f3f}
+.report .c-brak{background:#fbe5e3;color:#b3261e}.report .c-czesciowo{background:#fbf0d9;color:#8a5600}.report .c-dziala{background:#e3f3e8;color:#1d7f3f}.report .c-nd{background:#eceef2;color:#5d6577}
+.rwho{color:var(--rink);display:block}
+.rlv{font:600 9px var(--display);background:#1b2130;color:#fff;padding:1px 3px;border-radius:2px}
+.rfn{border-bottom:1px solid var(--rline);padding-bottom:3px}
+.rproc{margin:0 0 10px;break-inside:avoid}.rproc p{margin:0 0 3px}.rproc ol{margin:2px 0 3px;padding-left:18px}
+.rfoot{margin-top:24px;padding-top:8px;border-top:1px solid var(--rline);color:var(--rmut);font-size:10px}
+@media (max-width:1100px){.reppage{grid-template-columns:1fr}.repctl{position:static}}
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  html,body{height:auto;background:#fff!important}
+  body{display:block}
+  body>header,#banner,.repctl,#modal,.toast{display:none!important}
+  main,.page,.reppage,.repwrap{display:block!important;overflow:visible!important;padding:0!important;margin:0!important}
+  .report{box-shadow:none;width:auto;padding:0;border-radius:0}
+  .rbreak{break-before:page}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -211,11 +272,11 @@ const STATUS=[['szkic','Szkic'],['dyskusja','Do dyskusji'],['uzgodnione','Uzgodn
 const MODELS=[['','nie ustalono'],['grupa','Centralnie (Grupa)'],['hybryda','Hybrydowo'],['lokalnie','Lokalnie (uczelnia)']];
 const STATES=[['','—'],['brak','Brak'],['czesciowo','Częściowo'],['dziala','Działa'],['nd','Nie dotyczy']];
 const DEF_UNITS=[{code:'UV',name:'Uniwersytet VIZJA'},{code:'UAFM',name:'UAFM Kraków'},{code:'UZW',name:'UZW'}];
-const VIEWS=[['struktura','Struktura'],['mapa','Mapa funkcji'],['macierz','Macierz odpowiedzialności'],['uzgodnienia','Do uzgodnienia'],['historia','Historia zmian']];
+const VIEWS=[['struktura','Struktura'],['mapa','Mapa funkcji'],['macierz','Macierz odpowiedzialności'],['uzgodnienia','Do uzgodnienia'],['historia','Historia zmian'],['raport','Raport dla zarządu']];
 const lbl=(arr,k)=>(arr.find(a=>a[0]===(k||''))||arr[0])[1];
 
 /* ---------- stan ---------- */
-const S={db:null,me:null,role:null,canWrite:false,isAdmin:false,members:{},online:[],started:false,nodes:new Map(),comments:[],log:[],config:null,
+const S={db:null,me:null,role:null,canWrite:false,isAdmin:false,members:{},settings:{},online:[],started:false,nodes:new Map(),comments:[],log:[],config:null,
   view:'struktura',area:null,sel:null,open:new Set(),q:'',names:{},loaded:false,
   mf:{status:'',model:'*',unit:''},pending:false,readonly:false};
 const $=s=>document.querySelector(s);
@@ -240,7 +301,7 @@ const cFrom=r=>({id:r.id,node:r.node,area:r.area,text:r.body,by:r.by_email,at:Da
 const lFrom=r=>({id:r.id,node:r.node,nodeName:r.node_name,area:r.area,action:r.action,detail:r.detail,by:r.by_email,at:Date.parse(r.at)||0});
 function chk(res){if(res&&res.error)throw res.error;return res?res.data:null;}
 function applyNode(r){S.nodes.set(r.id,fromRow(r));}
-function applySettings(rows){const u=rows.find(r=>r.key==='units');S.config=u?{units:u.value}:null;}
+function applySettings(rows){S.settings={};rows.forEach(r=>S.settings[r.key]=r.value);const u=rows.find(r=>r.key==='units');S.config=u?{units:u.value}:null;}
 function applyMembers(rows){S.members={};rows.forEach(m=>S.members[m.email]=m);}
 
 /* ---------- zapis ---------- */
@@ -442,7 +503,7 @@ function render(force){
   if(S.hashSel&&S.nodes.has(S.hashSel)){const id=S.hashSel;S.hashSel=null;S.area=rootOf(id);path(id).forEach(p=>S.open.add(p.id));}
   if(!areas().length){main.innerHTML='<div class="empty"><h2>Brak obszarów</h2><p>Zacznij od dodania pierwszego obszaru, np. „Obszar IT”.</p>'+(S.db&&S.canWrite?'<button class="btn primary" data-act="newArea">Dodaj obszar</button>':'')+'</div>';return;}
   const keep=main.querySelector('.detail,.page');const st=keep?keep.scrollTop:0;const tr=main.querySelector('.tree');const tst=tr?tr.scrollTop:0;
-  main.innerHTML=({struktura:vStruktura,mapa:vMapa,macierz:vMacierz,uzgodnienia:vUzg,historia:vHist}[S.view]||vStruktura)();
+  main.innerHTML=({struktura:vStruktura,mapa:vMapa,macierz:vMacierz,uzgodnienia:vUzg,historia:vHist,raport:vRaport}[S.view]||vStruktura)();
   if(!force){const k2=main.querySelector('.detail,.page');if(k2)k2.scrollTop=st;const t2=main.querySelector('.tree');if(t2)t2.scrollTop=tst;}
   else {const t2=main.querySelector('.tree');if(t2)t2.scrollTop=tst;}
 }
@@ -565,6 +626,83 @@ function vHist(){const L=S.log.filter(l=>!l.area||l.area===S.area);
   return '<div class="page"><h2>Historia zmian</h2><p class="lead">Ostatnie zmiany w obszarze, najnowsze na górze (do 300 wpisów).</p><div class="tablewrap" style="padding:4px 14px"><div class="loglist">'+
   (L.length?L.map(l=>'<div class="logi"><time>'+esc(fmt(l.at))+'</time><span><b>'+esc(nm(l.by))+'</b> · '+esc(l.action)+(l.detail?' ('+esc(l.detail)+')':'')+' · '+(S.nodes.has(l.node)?'<a data-sel="'+esc(l.node)+'" style="cursor:pointer;color:var(--accent)">'+esc(S.nodes.get(l.node).name)+'</a>':esc(l.nodeName||''))+'</span></div>').join(''):'<p class="muted">Brak zapisanych zmian.</p>')+'</div></div></div>';}
 
+/* ---------- raport dla zarządu ---------- */
+const REP_SECTIONS=[['summary','Podsumowanie i wnioski'],['decisions','Kwestie do decyzji'],['functions','Przegląd funkcji L2'],['matrix','Macierz odpowiedzialności'],['comments','Otwarte uwagi zespołu'],['changes','Postęp prac'],['details','Szczegóły procesów (załącznik)']];
+function repDefaults(){const d=new Date(Date.now()-14*864e5);return {summary:true,decisions:true,functions:true,matrix:true,comments:true,changes:true,details:false,since:d.toISOString().slice(0,10)};}
+function repNote(){const v=S.settings&&S.settings['raport-'+S.area];return (v&&typeof v==='object')?v:{text:''};}
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const pl=(n,one,few,many)=>n+' '+(n===1?one:(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?few:many);
+function stackBar(parts,total){return '<div class="rbar">'+parts.filter(p=>p[1]>0).map(p=>'<i class="'+p[0]+'" style="width:'+(p[1]/(total||1)*100)+'%" title="'+esc(p[2]+': '+p[1])+'"></i>').join('')+'</div>';}
+function repData(){
+  const a=S.nodes.get(S.area);const U=units();const l2=kids(a.id);const l3=[];l2.forEach(f=>kids(f.id).forEach(p=>l3.push(p)));
+  const l4=l3.reduce((s,p)=>s+kids(p.id).length,0);const T=l3.length;
+  const st={};STATUS.forEach(([k])=>st[k]=0);l3.forEach(p=>st[p.status||'szkic']++);
+  const md={};MODELS.forEach(([k])=>md[k]=0);l3.forEach(p=>md[p.model||'']++);
+  const noOwner=l3.filter(p=>!(p.owner||'').trim());
+  const cov=U.map(u=>{const c={};STATES.forEach(([k])=>c[k]=0);l3.forEach(p=>c[((p.units||{})[u.code]||{}).state||'']++);return {u,c};});
+  const all=[a,...subtree(a.id)];const ids=new Set(all.map(n=>n.id));
+  const openC=S.comments.filter(c=>!c.resolved&&ids.has(c.node));
+  const disc=all.filter(n=>n.status==='dyskusja');
+  const since=Date.parse(S.rep.since||'')||0;
+  const chg=S.log.filter(l=>(l.area===S.area||ids.has(l.node))&&l.at>=since&&l.action!=='import');
+  return {a,U,l2,l3,l4,T,st,md,noOwner,cov,openC,disc,chg,since};}
+function repInsights(D){const out=[];const {T,st,md,noOwner,cov,openC,disc}=D;if(!T)return out;
+  const done=st.uzgodnione+st.zatwierdzone;
+  out.push('Uzgodniono lub zatwierdzono <b>'+done+' z '+T+'</b> procesów L3 ('+pct(done,T)+'%); '+st.zatwierdzone+' ma status „Zatwierdzone”.');
+  const noModel=md[''];out.push(noModel?'Model realizacji w Grupie nie jest ustalony dla <b>'+pl(noModel,'procesu','procesów','procesów')+'</b> ('+pct(noModel,T)+'%).':'Model realizacji jest ustalony dla wszystkich procesów.');
+  if(T-noModel)out.push('Wśród ustalonych: centralnie (Grupa) '+md.grupa+', hybrydowo '+md.hybryda+', lokalnie '+md.lokalnie+'.');
+  out.push(noOwner.length?'<b>'+pl(noOwner.length,'proces','procesy','procesów')+'</b> '+(noOwner.length===1?'nie ma':'nie ma')+' właściciela na poziomie Grupy.':'Każdy proces ma właściciela na poziomie Grupy.');
+  const gaps=cov.map(({u,c})=>({u,brak:c.brak,unknown:c[''],czesc:c.czesciowo,dziala:c.dziala}));
+  const worst=gaps.slice().sort((x,y)=>(y.brak+y.unknown)-(x.brak+x.unknown))[0];
+  out.push('Stan wdrożenia: '+gaps.map(g=>esc(g.u.code)+' – działa '+g.dziala+', częściowo '+g.czesc+', brak '+g.brak+(g.unknown?', nieocenione '+g.unknown:'')).join('; ')+'.');
+  if(worst&&(worst.brak+worst.unknown))out.push('Najwięcej luk lub nieocenionych procesów ma <b>'+esc(worst.u.code)+'</b> ('+(worst.brak+worst.unknown)+').');
+  if(disc.length||openC.length)out.push('Do dyskusji: '+pl(disc.length,'element','elementy','elementów')+' ze statusem „Do dyskusji” i '+pl(openC.length,'otwarta uwaga','otwarte uwagi','otwartych uwag')+' zespołu.');
+  return out;}
+function vRaport(){if(!S.rep)S.rep=repDefaults();const R=S.rep;const D=repData();const note=repNote();
+  const today=new Date().toLocaleDateString('pl-PL',{day:'numeric',month:'long',year:'numeric'});
+  const ctl='<aside class="repctl"><h2>Raport dla zarządu</h2><p class="muted">Raport składa się z aktualnych danych. Wybierz sekcje, dopisz wnioski i wydrukuj lub zapisz jako PDF.</p>'+
+    '<fieldset><legend>Sekcje</legend>'+REP_SECTIONS.map(([k,v])=>'<label class="chk"><input type="checkbox" data-rep="'+k+'"'+(R[k]?' checked':'')+'> '+esc(v)+'</label>').join('')+'</fieldset>'+
+    '<div class="field"><label for="rsince">Postęp prac od dnia</label><input type="date" id="rsince" data-rep="since" value="'+esc(R.since)+'"></div>'+
+    '<div class="field"><label for="rnote">Wnioski i rekomendacje dla zarządu</label><textarea id="rnote" rows="7" placeholder="Np. rekomendujemy centralizację backupu i monitoringu bezpieczeństwa w Grupie; do decyzji: …"'+(S.isAdmin?'':' disabled')+'>'+esc(note.text||'')+'</textarea><div class="hint" style="margin:4px 0 0">'+(S.isAdmin?'Zapisuje się automatycznie i jest widoczna dla zespołu'+(note.by?' · ostatnio: '+esc(nm(note.by))+', '+esc(rel(note.at)):''):'Wnioski wpisuje administrator.')+'</div></div>'+
+    '<button class="btn primary" data-act="print" style="width:100%">Drukuj / zapisz jako PDF</button><p class="hint" style="margin-top:6px">W oknie drukowania wybierz „Zapisz jako PDF”. Najlepiej w Chrome lub Edge.</p></aside>';
+  let r='<article class="report"><div class="rhead"><div class="rkick">Grupa VIZJA · '+esc(units().map(u=>u.code).join(' · '))+'</div><h1>Struktura organizacyjna: '+esc(D.a.name)+'</h1><div class="rmeta">Raport dla zarządu · stan na '+esc(today)+' · przygotował(a): '+esc(nm(S.me))+' · dokument roboczy</div></div>';
+  if(R.summary){
+    r+='<section class="rsec"><h2>Podsumowanie</h2><div class="rkpis">'+
+      '<div><b>'+D.l2.length+'</b><span>funkcji L2</span></div><div><b>'+D.T+'</b><span>procesów L3</span></div><div><b>'+D.l4+'</b><span>działań L4</span></div>'+
+      '<div><b>'+pct(D.st.uzgodnione+D.st.zatwierdzone,D.T)+'%</b><span>procesów uzgodnionych</span></div><div><b>'+pct(D.T-D.md[''],D.T)+'%</b><span>z ustalonym modelem</span></div><div><b>'+pct(D.T-D.noOwner.length,D.T)+'%</b><span>z właścicielem</span></div></div>'+
+      '<div class="rgrid2"><div><h3>Status uzgodnienia procesów L3</h3>'+stackBar(STATUS.map(([k,v])=>['st-'+k,D.st[k],v]),D.T)+'<div class="rleg">'+STATUS.map(([k,v])=>'<span><i class="st-'+k+'"></i>'+v+' '+D.st[k]+'</span>').join('')+'</div>'+
+      '<h3>Model realizacji w Grupie</h3>'+stackBar([['m-grupa',D.md.grupa,'Centralnie'],['m-hybryda',D.md.hybryda,'Hybrydowo'],['m-lokalnie',D.md.lokalnie,'Lokalnie'],['m-none',D.md[''],'Nie ustalono']],D.T)+'<div class="rleg"><span><i class="m-grupa"></i>Centralnie '+D.md.grupa+'</span><span><i class="m-hybryda"></i>Hybrydowo '+D.md.hybryda+'</span><span><i class="m-lokalnie"></i>Lokalnie '+D.md.lokalnie+'</span><span><i class="m-none"></i>Nie ustalono '+D.md['']+'</span></div></div>'+
+      '<div><h3>Stan wdrożenia procesów w uczelniach</h3>'+D.cov.map(({u,c})=>'<div class="rcov"><span class="rcode">'+esc(u.code)+'</span>'+stackBar([['s-dziala',c.dziala,'Działa'],['s-czesciowo',c.czesciowo,'Częściowo'],['s-brak',c.brak,'Brak'],['s-nd',c.nd,'Nie dotyczy'],['s-none',c[''],'Nieocenione']],D.T)+'</div>').join('')+
+      '<div class="rleg"><span><i class="s-dziala"></i>Działa</span><span><i class="s-czesciowo"></i>Częściowo</span><span><i class="s-brak"></i>Brak</span><span><i class="s-nd"></i>Nie dotyczy</span><span><i class="s-none"></i>Nieocenione</span></div></div></div>'+
+      '<h3>Najważniejsze wnioski</h3><ul class="rlist">'+repInsights(D).map(t=>'<li>'+t+'</li>').join('')+'</ul>'+
+      (note.text?'<h3>Wnioski i rekomendacje</h3><div class="rnote">'+esc(note.text)+'</div>':'')+'</section>';}
+  if(R.decisions){const noModel=D.l3.filter(p=>!p.model);
+    r+='<section class="rsec"><h2>Kwestie do decyzji</h2>'+
+      (D.disc.length?'<h3>Elementy oznaczone „Do dyskusji” ('+D.disc.length+')</h3><table class="rtab"><thead><tr><th>Element</th><th>Funkcja</th><th>Otwarte uwagi</th></tr></thead><tbody>'+D.disc.map(n=>'<tr><td><span class="rlv">'+LVC[n.level]+'</span> '+esc(n.name)+'</td><td>'+esc(n.level>2?path(n.id)[1].name:'—')+'</td><td class="num">'+openComments(n.id)+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">Brak elementów ze statusem „Do dyskusji”.</p>')+
+      (noModel.length?'<h3>Do ustalenia: model realizacji ('+noModel.length+')</h3><p class="rinline">'+noModel.map(p=>esc(p.name)).join(' · ')+'</p>':'')+
+      (D.noOwner.length?'<h3>Do ustalenia: właściciel procesu w Grupie ('+D.noOwner.length+')</h3><p class="rinline">'+D.noOwner.map(p=>esc(p.name)).join(' · ')+'</p>':'')+'</section>';}
+  if(R.functions){
+    r+='<section class="rsec"><h2>Przegląd funkcji L2</h2><table class="rtab"><thead><tr><th style="width:24%">Funkcja</th><th>Za co odpowiada</th><th style="width:13%">Model</th><th style="width:14%">Właściciel</th><th style="width:16%">Procesy (uzgodn./wszystkie)</th></tr></thead><tbody>'+
+      D.l2.map(f=>{const ps=kids(f.id);const ok=ps.filter(p=>p.status==='uzgodnione'||p.status==='zatwierdzone').length;return '<tr><td><b>'+esc(f.name)+'</b><div class="rsub">'+esc(lbl(STATUS,f.status))+'</div></td><td>'+esc(f.desc)+'</td><td>'+esc(f.model?lbl(MODELS,f.model):'—')+'</td><td>'+esc(f.owner||'—')+'</td><td class="num">'+ok+' / '+ps.length+'</td></tr>';}).join('')+'</tbody></table></section>';}
+  if(R.matrix){
+    r+='<section class="rsec rbreak"><h2>Macierz odpowiedzialności: procesy L3 × uczelnie</h2><table class="rtab rmx"><thead><tr><th>Proces</th><th>Status</th><th>Model</th><th>Właściciel (Grupa)</th>'+D.U.map(u=>'<th>'+esc(u.code)+'</th>').join('')+'</tr></thead><tbody>'+
+      D.l2.map(f=>'<tr class="rgrp"><td colspan="'+(4+D.U.length)+'">'+esc(f.name)+'</td></tr>'+kids(f.id).map(p=>'<tr><td>'+esc(p.name)+'</td><td><span class="rchip c-'+esc(p.status||'szkic')+'">'+esc(lbl(STATUS,p.status))+'</span></td><td>'+esc(p.model?lbl(MODELS,p.model).replace(' (Grupa)','').replace(' (uczelnia)',''):'—')+'</td><td>'+esc(p.owner||'—')+'</td>'+
+        D.U.map(u=>{const v=(p.units||{})[u.code]||{};return '<td>'+(v.state?'<span class="rchip c-'+esc(v.state)+'">'+esc(lbl(STATES,v.state))+'</span> ':'')+'<span class="rwho">'+esc(v.who||(v.state?'':'—'))+'</span></td>';}).join('')+'</tr>').join('')).join('')+'</tbody></table></section>';}
+  if(R.comments){
+    r+='<section class="rsec"><h2>Otwarte uwagi zespołu ('+D.openC.length+')</h2>'+(D.openC.length?'<table class="rtab"><thead><tr><th style="width:28%">Element</th><th>Uwaga</th><th style="width:18%">Autor, data</th></tr></thead><tbody>'+
+      D.openC.map(c=>{const n=S.nodes.get(c.node);return '<tr><td>'+esc(n?n.name:'')+'</td><td>'+esc(c.text)+'</td><td>'+esc(nm(c.by))+'<div class="rsub">'+esc(fmt(c.at))+'</div></td></tr>';}).join('')+'</tbody></table>':'<p class="muted">Brak otwartych uwag.</p>')+'</section>';}
+  if(R.changes){const people=new Set(D.chg.map(l=>l.by));const touched=new Set(D.chg.map(l=>l.node));
+    r+='<section class="rsec"><h2>Postęp prac od '+esc(new Date(D.since||Date.now()).toLocaleDateString('pl-PL'))+'</h2><p>'+(D.chg.length?'<b>'+D.chg.length+'</b> zmian wprowadzonych przez <b>'+people.size+'</b> '+(people.size===1?'osobę':'osób')+' w <b>'+touched.size+'</b> elementach struktury.':'Brak zmian w tym okresie.')+'</p>'+
+      (D.chg.length?'<table class="rtab"><thead><tr><th style="width:16%">Data</th><th style="width:18%">Kto</th><th>Zmiana</th></tr></thead><tbody>'+D.chg.slice(0,25).map(l=>'<tr><td>'+esc(fmt(l.at))+'</td><td>'+esc(nm(l.by))+'</td><td>'+esc((S.nodes.get(l.node)||{}).name||l.nodeName||'')+': '+esc(l.action)+(l.detail?' – '+esc(l.detail):'')+'</td></tr>').join('')+'</tbody></table>'+(D.chg.length>25?'<p class="rsub">Pokazano 25 najnowszych z '+D.chg.length+' zmian.</p>':''):'')+'</section>';}
+  if(R.details){
+    r+='<section class="rsec rbreak"><h2>Załącznik: szczegóły procesów</h2>'+D.l2.map(f=>'<h3 class="rfn">'+esc(f.name)+'</h3>'+kids(f.id).map(p=>'<div class="rproc"><h4>'+esc(p.name)+' <span class="rchip c-'+esc(p.status||'szkic')+'">'+esc(lbl(STATUS,p.status))+'</span></h4><p>'+esc(p.desc)+'</p>'+
+      ((p.decisions||[]).length?'<div class="rsub">Decyzje L3:</div><ol>'+p.decisions.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ol>':'')+
+      (kids(p.id).length?'<div class="rsub">Działania L4: '+kids(p.id).map(k=>esc(k.name)).join(' · ')+'</div>':'')+'</div>').join('')).join('')+'</section>';}
+  r+='<footer class="rfoot">Wygenerowano w narzędziu Struktura Grupy VIZJA · '+esc(location.host)+' · '+esc(fmt(Date.now()))+'</footer></article>';
+  return '<div class="page reppage">'+ctl+'<div class="repwrap">'+r+'</div></div>';}
+let noteTimer=null;
+async function saveRepNote(text){if(!S.isAdmin||!S.db)return;try{const v={text,by:S.me,at:Date.now()};chk(await S.db.from('settings').upsert({key:'raport-'+S.area,value:v}));S.settings['raport-'+S.area]=v;}catch(e){failWrite(e);}}
+
 /* ---------- modale ---------- */
 function modal(html,wide){$('#modal').innerHTML='<div class="modal" role="dialog" aria-modal="true"><div class="box'+(wide?' wide':'')+'">'+html+'</div></div>';const f=$('#modal').querySelector('input,textarea,button');if(f)f.focus();}
 function closeModal(){$('#modal').innerHTML='';}
@@ -597,6 +735,7 @@ document.addEventListener('click',async e=>{
     if(act==='mclose'){closeModal();return;}
     if(act==='settings'){settings();return;}
     if(act==='team'){teamBox();return;}
+    if(act==='print'){const n=$('#rnote');if(n&&S.isAdmin&&n.value!==(repNote().text||''))await saveRepNote(n.value);window.print();return;}
     if(act==='profile'){profileBox(false);return;}
     if(act==='logout'){if(sb)await sb.auth.signOut();history.replaceState(null,'',location.pathname);location.reload();return;}
     if(act==='mlink'){loginLink(b.dataset.mem,false);return;}
@@ -618,9 +757,12 @@ document.addEventListener('click',async e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').innerHTML){closeModal();}
   if(e.key==='Enter'){const c=e.target.closest('.mcard');if(c){select(c.dataset.sel,'struktura');}
     if(e.target.matches('input[type=text][data-id]'))e.target.blur();}});
-document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;const pos=e.target.selectionStart;render(true);const q=$('#q');if(q){q.focus();q.setSelectionRange(pos,pos);}}});
+document.addEventListener('input',e=>{if(e.target.id==='rnote'){const v=e.target.value;clearTimeout(noteTimer);noteTimer=setTimeout(()=>saveRepNote(v),1200);return;}
+  if(e.target.id==='q'){S.q=e.target.value;const pos=e.target.selectionStart;render(true);const q=$('#q');if(q){q.focus();q.setSelectionRange(pos,pos);}}});
 document.addEventListener('change',async e=>{const t=e.target;
   if(t.id==='area'){S.area=t.value;S.sel=t.value;S.open.add(t.value);kids(t.value).forEach(k=>S.open.add(k.id));setHash(S.view==='struktura'?'w-'+t.value:S.view);render(true);return;}
+  if(t.dataset.rep){if(!S.rep)S.rep=repDefaults();S.rep[t.dataset.rep]=t.type==='checkbox'?t.checked:t.value;render(true);return;}
+  if(t.id==='rnote'){clearTimeout(noteTimer);saveRepNote(t.value);return;}
   if(t.dataset.mf){S.mf[t.dataset.mf]=t.value;render(true);return;}
   if(t.dataset.mem){const patch={[t.dataset.mf2]:t.dataset.mf2==='name'?t.value.trim():t.value};try{chk(await sb.from('members').update(patch).eq('email',t.dataset.mem));refetch('members');logIt('','zespół',t.dataset.mem+': '+({name:'imię i nazwisko',unit:'uczelnia',role:'rola'}[t.dataset.mf2]||t.dataset.mf2)+' → '+(t.dataset.mf2==='role'?lbl(ROLES,t.value):t.value||'—'),{name:'Zespół',area:''});}catch(err){failWrite(err);}return;}
   if(t.dataset.actChange==='move'&&t.value){const n=S.nodes.get(t.dataset.id);const np=S.nodes.get(t.value);const ord=kids(np.id).reduce((m,s)=>Math.max(m,s.order||0),0)+1;

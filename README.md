@@ -61,6 +61,10 @@ Zaproszenia obsługują funkcje `api/login-link.js` (tworzy zaproszenie, tylko a
 
 Jeśli zespół ma sam prosić o link na stronie logowania, Supabase potrzebuje własnego serwera poczty, bo domyślnie wysyła wiadomości tylko do członków zespołu projektu Supabase (limit 2 na godzinę). Ustawisz to w **Authentication → Emails → SMTP Settings** (np. Gmail z hasłem do aplikacji, Brevo, Resend albo SMTP uczelni).
 
+## Raport dla zarządu
+
+Zakładka **Raport dla zarządu** składa raport z aktualnych danych wybranego obszaru: podsumowanie i wnioski, kwestie do decyzji, przegląd funkcji, macierz odpowiedzialności, otwarte uwagi, postęp prac od wybranej daty i (opcjonalnie) szczegóły procesów. Administrator dopisuje wnioski i rekomendacje (zapisują się dla całego zespołu). Przycisk **Drukuj / zapisz jako PDF** daje raport w formacie A4.
+
 ## Kolejne zmiany
 
 Każda zmiana w repozytorium (np. wprowadzona z pomocą Claude) wdraża się na Vercelu automatycznie.
